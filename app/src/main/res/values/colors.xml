@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="golden_sand">#E3AC6C</color>
+    <color name="light_gray">#F4F4F4</color>
+    <color name="medium_gray">#B1AEAE</color>
+    <color name="brown">#966725</color>
+    <color name="primary_color">#966725</color>
+    <color name="filter_color_pressed">#D5C3AC</color>
+    <color name="filter_color">#F4E6D4</color>
+</resources>

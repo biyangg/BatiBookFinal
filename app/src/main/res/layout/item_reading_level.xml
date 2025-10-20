@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Button xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/btn_reading_level"
+    android:layout_width="0dp"
+    android:layout_height="52dp"
+    android:layout_columnWeight="1"
+    android:layout_margin="6dp"
+    android:text="0"
+    android:textSize="18sp"
+    android:fontFamily="@font/poppins_medium"
+    android:textColor="#000000"
+    android:background="@drawable/filter_level_button"
+    android:stateListAnimator="@null" />
