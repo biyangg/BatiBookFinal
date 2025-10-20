@@ -1,5 +1,6 @@
 package com.abakada.batibooktwo
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
@@ -37,6 +38,12 @@ class MainActivity : AppCompatActivity() {
         
         // Initialize home content
         initializeHomeContent()
+
+        // Initialize search functionality
+        initializeSearchFunctionality()
+        
+        // Initialize see more buttons
+        initializeSeeMoreButtons()
 
         // Bottom navigation listener
         binding.bottomNavigationView.setOnItemSelectedListener { item ->
@@ -177,6 +184,21 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // ✅ DARK MODE SWITCH SETUP
+        val darkModeSwitch = bottomSheetView?.findViewById<Switch>(R.id.switcher)
+        if (darkModeSwitch != null) {
+            val sharedPrefs = getSharedPreferences("AppSettings", MODE_PRIVATE)
+            val isDarkMode = sharedPrefs.getBoolean("dark_mode", false)
+            darkModeSwitch.isChecked = isDarkMode
+
+            darkModeSwitch.setOnCheckedChangeListener { _, isChecked ->
+                sharedPrefs.edit { putBoolean("dark_mode", isChecked) }
+                Toast.makeText(this@MainActivity, 
+                    if (isChecked) "Dark mode enabled" else "Dark mode disabled", 
+                    Toast.LENGTH_SHORT).show()
+            }
+        }
+
         // About Batibook navigation
         val aboutLayout = bottomSheetView?.findViewById<LinearLayout>(R.id.layoutAppInfo)
         aboutLayout?.setOnClickListener {
@@ -237,6 +259,11 @@ class MainActivity : AppCompatActivity() {
             imageView.setImageResource(book.imageRes)
             titleView.text = getString(book.titleRes)
             
+            // Add click listener for book
+            bookView.setOnClickListener {
+                showBookDetails(book)
+            }
+            
             container.addView(bookView)
         }
     }
@@ -255,6 +282,11 @@ class MainActivity : AppCompatActivity() {
             
             imageView.setImageResource(book.imageRes)
             titleView.text = getString(book.titleRes)
+            
+            // Add click listener for book
+            bookView.setOnClickListener {
+                showBookDetails(book)
+            }
             
             container.addView(bookView)
         }
@@ -286,6 +318,11 @@ class MainActivity : AppCompatActivity() {
             layoutParams.columnSpec = GridLayout.spec(index % 3, 1f)
             layoutParams.rowSpec = GridLayout.spec(index / 3, 1f)
             categoryView.layoutParams = layoutParams
+            
+            // Add click listener for category
+            categoryView.setOnClickListener {
+                showCategoryBooks(category)
+            }
             
             grid.addView(categoryView)
         }
@@ -350,6 +387,26 @@ class MainActivity : AppCompatActivity() {
         val btnShowBooks = filterBottomSheetView?.findViewById<Button>(R.id.btn_show_books)
         val btnClose = filterBottomSheetView?.findViewById<ImageView>(R.id.cancelButton)
 
+        // Update CTA state and label to reflect current selections
+        val updateCta: () -> Unit = {
+            val totalSelected = selectedReadingLevels.size + selectedCategories.size
+            if (btnShowBooks != null) {
+                if (totalSelected > 0) {
+                    btnShowBooks.isEnabled = true
+                    btnShowBooks.isClickable = true
+                    btnShowBooks.alpha = 1f
+                    btnShowBooks.text = "Show Books (${totalSelected})"
+                    btnShowBooks.contentDescription = "Show Books, ${totalSelected} filters selected"
+                } else {
+                    btnShowBooks.isEnabled = false
+                    btnShowBooks.isClickable = false
+                    btnShowBooks.alpha = 0.5f
+                    btnShowBooks.text = getString(R.string.show_books)
+                    btnShowBooks.contentDescription = getString(R.string.show_books)
+                }
+            }
+        }
+
         // Initialize reading levels (0-9)
         for (i in 0..9) {
             val levelView = LayoutInflater.from(this).inflate(R.layout.item_reading_level, readingLevelGrid, false)
@@ -367,6 +424,7 @@ class MainActivity : AppCompatActivity() {
                     selectedReadingLevels.add(i)
                     button.isSelected = true
                 }
+                updateCta()
             }
             readingLevelGrid?.addView(levelView)
         }
@@ -392,6 +450,7 @@ class MainActivity : AppCompatActivity() {
                     selectedCategories.add(category)
                     button.isSelected = true
                 }
+                updateCta()
             }
             categoriesGrid?.addView(categoryView)
         }
@@ -401,6 +460,7 @@ class MainActivity : AppCompatActivity() {
             selectedReadingLevels.clear()
             selectedCategories.clear()
             resetFilterButtons(readingLevelGrid, categoriesGrid)
+            updateCta()
         }
 
         // Show Books button
@@ -411,6 +471,9 @@ class MainActivity : AppCompatActivity() {
 
         // Close (X) button
         btnClose?.setOnClickListener { hideFilterBottomSheet() }
+
+        // Initialize CTA state on open
+        updateCta()
     }
 
     private fun resetFilterButtons(readingLevelGrid: GridLayout?, categoriesGrid: GridLayout?) {
@@ -430,10 +493,328 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun applyFilters() {
-        // TODO: Apply filters to book data
-        // This is where you would filter the books based on selectedReadingLevels and selectedCategories
-        // For now, just show a toast
+        if (selectedReadingLevels.isEmpty() && selectedCategories.isEmpty()) {
+            Toast.makeText(this, "Please select at least one filter option", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        // Show filtered books dialog
+        showFilteredBooks()
+        
         val message = "Filtered by: Reading Levels ${selectedReadingLevels.joinToString()}, Categories: ${selectedCategories.joinToString()}"
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun showFilteredBooks() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.filtered_books_dialog, null)
+        val title = dialogView.findViewById<TextView>(R.id.dialog_title)
+        val booksGrid = dialogView.findViewById<GridLayout>(R.id.filtered_books_grid)
+        val closeButton = dialogView.findViewById<ImageView>(R.id.close_button)
+        
+        title.text = "Filtered Books"
+        
+        // Sample filtered books based on selections
+        val filteredBooks = mutableListOf<BookData>()
+        
+        // Add books based on selected categories
+        if (selectedCategories.contains("Folktales")) {
+            filteredBooks.add(BookData("The Magic Carpet", R.drawable.book1, R.string.dog_and_cat))
+            filteredBooks.add(BookData("The Wise Turtle", R.drawable.book2, R.string.ana_and_the_ball))
+        }
+        if (selectedCategories.contains("Animal Tales")) {
+            filteredBooks.add(BookData("Dog and Cat", R.drawable.book1, R.string.dog_and_cat))
+            filteredBooks.add(BookData("Forest Friends", R.drawable.book5, R.string.toto_and_his_friends_in_forest))
+        }
+        if (selectedCategories.contains("Legends and Myths")) {
+            filteredBooks.add(BookData("The Legend of Mount Apo", R.drawable.book3, R.string.lito_s_umbrella))
+            filteredBooks.add(BookData("The Golden Fish", R.drawable.book4, R.string.mila_and_the_butterfly))
+        }
+        
+        // If no categories selected, show books based on reading levels
+        if (selectedCategories.isEmpty() && selectedReadingLevels.isNotEmpty()) {
+            filteredBooks.addAll(listOf(
+                BookData("Level ${selectedReadingLevels.first()} Book 1", R.drawable.book1, R.string.dog_and_cat),
+                BookData("Level ${selectedReadingLevels.first()} Book 2", R.drawable.book2, R.string.ana_and_the_ball)
+            ))
+        }
+        
+        // If no filters selected, show all books
+        if (filteredBooks.isEmpty()) {
+            filteredBooks.addAll(listOf(
+                BookData("Sample Book 1", R.drawable.book1, R.string.dog_and_cat),
+                BookData("Sample Book 2", R.drawable.book2, R.string.ana_and_the_ball),
+                BookData("Sample Book 3", R.drawable.book3, R.string.lito_s_umbrella),
+                BookData("Sample Book 4", R.drawable.book4, R.string.mila_and_the_butterfly)
+            ))
+        }
+        
+        // Populate books grid
+        filteredBooks.forEachIndexed { index, book ->
+            val bookView = LayoutInflater.from(this).inflate(R.layout.item_book, booksGrid, false)
+            val imageView = bookView.findViewById<ImageView>(R.id.book_image)
+            val titleView = bookView.findViewById<TextView>(R.id.book_title)
+            
+            imageView.setImageResource(book.imageRes)
+            titleView.text = getString(book.titleRes)
+            
+            bookView.setOnClickListener {
+                showBookDetails(book)
+            }
+            
+            val layoutParams = GridLayout.LayoutParams()
+            layoutParams.columnSpec = GridLayout.spec(index % 2, 1f)
+            layoutParams.rowSpec = GridLayout.spec(index / 2, 1f)
+            bookView.layoutParams = layoutParams
+            
+            booksGrid.addView(bookView)
+        }
+        
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+        
+        closeButton.setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialog.show()
+    }
+
+    private fun initializeSearchFunctionality() {
+        val searchBar = findViewById<EditText>(R.id.search_bar)
+        val searchIcon = findViewById<ImageView>(R.id.search_icon)
+        
+        // Make search bar clickable and focusable
+        searchBar.setOnClickListener {
+            searchBar.isFocusableInTouchMode = true
+            searchBar.requestFocus()
+            // Show cursor by making it focusable
+        }
+        
+        // Search functionality
+        searchBar.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) {
+                performSearch(searchBar.text.toString())
+                searchBar.clearFocus()
+                // Hide cursor by clearing focus
+                true
+            } else {
+                false
+            }
+        }
+        
+        // Search icon click
+        searchIcon.setOnClickListener {
+            performSearch(searchBar.text.toString())
+        }
+    }
+    
+    private fun performSearch(query: String) {
+        if (query.isBlank()) {
+            Toast.makeText(this, "Please enter a search term", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        // For now, just show a toast with the search query
+        Toast.makeText(this, "Searching for: $query", Toast.LENGTH_SHORT).show()
+        
+        // TODO: Implement actual search functionality
+        // This would filter books based on the search query
+    }
+    
+    private fun showBookDetails(book: BookData) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.book_details_dialog, null)
+        val bookImage = dialogView.findViewById<ImageView>(R.id.dialog_book_image)
+        val bookTitle = dialogView.findViewById<TextView>(R.id.dialog_book_title)
+        val downloadButton = dialogView.findViewById<Button>(R.id.download_button)
+        val favoriteButton = dialogView.findViewById<Button>(R.id.favorite_button)
+        val readButton = dialogView.findViewById<Button>(R.id.read_button)
+        val closeButton = dialogView.findViewById<ImageView>(R.id.close_button)
+        
+        bookImage.setImageResource(book.imageRes)
+        bookTitle.text = getString(book.titleRes)
+        
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+        
+        downloadButton.setOnClickListener {
+            Toast.makeText(this, "Downloading ${getString(book.titleRes)}...", Toast.LENGTH_SHORT).show()
+            // TODO: Implement actual download functionality
+        }
+        
+        favoriteButton.setOnClickListener {
+            Toast.makeText(this, "Added ${getString(book.titleRes)} to favorites", Toast.LENGTH_SHORT).show()
+            // TODO: Implement actual favorite functionality
+        }
+        
+        readButton.setOnClickListener {
+            Toast.makeText(this, "Opening ${getString(book.titleRes)} for reading", Toast.LENGTH_SHORT).show()
+            // TODO: Implement actual reading functionality
+        }
+        
+        closeButton.setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialog.show()
+    }
+    
+    private fun showCategoryBooks(category: CategoryData) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.category_books_dialog, null)
+        val categoryTitle = dialogView.findViewById<TextView>(R.id.category_title)
+        val booksGrid = dialogView.findViewById<GridLayout>(R.id.category_books_grid)
+        val closeButton = dialogView.findViewById<ImageView>(R.id.close_button)
+        
+        categoryTitle.text = getString(category.titleRes)
+        
+        // Sample books for each category
+        val categoryBooks = when (category.title) {
+            "Folktales" -> listOf(
+                BookData("The Magic Carpet", R.drawable.book1, R.string.dog_and_cat),
+                BookData("The Wise Turtle", R.drawable.book2, R.string.ana_and_the_ball)
+            )
+            "Legends and Myths" -> listOf(
+                BookData("The Legend of Mount Apo", R.drawable.book3, R.string.lito_s_umbrella),
+                BookData("The Golden Fish", R.drawable.book4, R.string.mila_and_the_butterfly)
+            )
+            "Animal Tales" -> listOf(
+                BookData("Dog and Cat", R.drawable.book1, R.string.dog_and_cat),
+                BookData("Forest Friends", R.drawable.book5, R.string.toto_and_his_friends_in_forest)
+            )
+            else -> listOf(
+                BookData("Sample Book 1", R.drawable.book1, R.string.dog_and_cat),
+                BookData("Sample Book 2", R.drawable.book2, R.string.ana_and_the_ball)
+            )
+        }
+        
+        // Populate books grid
+        categoryBooks.forEachIndexed { index, book ->
+            val bookView = LayoutInflater.from(this).inflate(R.layout.item_book, booksGrid, false)
+            val imageView = bookView.findViewById<ImageView>(R.id.book_image)
+            val titleView = bookView.findViewById<TextView>(R.id.book_title)
+            
+            imageView.setImageResource(book.imageRes)
+            titleView.text = getString(book.titleRes)
+            
+            bookView.setOnClickListener {
+                showBookDetails(book)
+            }
+            
+            val layoutParams = GridLayout.LayoutParams()
+            layoutParams.columnSpec = GridLayout.spec(index % 2, 1f)
+            layoutParams.rowSpec = GridLayout.spec(index / 2, 1f)
+            bookView.layoutParams = layoutParams
+            
+            booksGrid.addView(bookView)
+        }
+        
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+        
+        closeButton.setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialog.show()
+    }
+    
+    private fun initializeSeeMoreButtons() {
+        // Find see more buttons in home content
+        val featuredSeeMore = findViewById<TextView>(R.id.featured_see_more)
+        val recommendedSeeMore = findViewById<TextView>(R.id.recommended_see_more)
+        
+        // Featured Stories See More
+        featuredSeeMore?.setOnClickListener {
+            showAllFeaturedStories()
+        }
+        
+        // Recommended Books See More
+        recommendedSeeMore?.setOnClickListener {
+            showAllRecommendedBooks()
+        }
+    }
+    
+    private fun showAllFeaturedStories() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.all_books_dialog, null)
+        val title = dialogView.findViewById<TextView>(R.id.dialog_title)
+        val booksGrid = dialogView.findViewById<GridLayout>(R.id.books_grid)
+        val closeButton = dialogView.findViewById<ImageView>(R.id.close_button)
+        
+        title.text = "All Featured Stories"
+        
+        val allFeaturedBooks = listOf(
+            BookData("Dog and Cat", R.drawable.book1, R.string.dog_and_cat),
+            BookData("Ana and the Ball", R.drawable.book2, R.string.ana_and_the_ball),
+            BookData("Lito's Umbrella", R.drawable.book3, R.string.lito_s_umbrella),
+            BookData("Mila and the Butterfly", R.drawable.book4, R.string.mila_and_the_butterfly),
+            BookData("The Magic Forest", R.drawable.book5, R.string.toto_and_his_friends_in_forest),
+            BookData("Ocean Adventures", R.drawable.book6, R.string.bituin_and_the_little_fish)
+        )
+        
+        populateBooksGrid(booksGrid, allFeaturedBooks)
+        
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+        
+        closeButton.setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialog.show()
+    }
+    
+    private fun showAllRecommendedBooks() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.all_books_dialog, null)
+        val title = dialogView.findViewById<TextView>(R.id.dialog_title)
+        val booksGrid = dialogView.findViewById<GridLayout>(R.id.books_grid)
+        val closeButton = dialogView.findViewById<ImageView>(R.id.close_button)
+        
+        title.text = "All Recommended Books"
+        
+        val allRecommendedBooks = listOf(
+            BookData("Toto and His Friends in Forest", R.drawable.book5, R.string.toto_and_his_friends_in_forest),
+            BookData("Bituin and the Little Fish", R.drawable.book6, R.string.bituin_and_the_little_fish),
+            BookData("Adventure Tales", R.drawable.book1, R.string.dog_and_cat),
+            BookData("Nature Stories", R.drawable.book2, R.string.ana_and_the_ball),
+            BookData("Friendship Stories", R.drawable.book3, R.string.lito_s_umbrella),
+            BookData("Learning Adventures", R.drawable.book4, R.string.mila_and_the_butterfly)
+        )
+        
+        populateBooksGrid(booksGrid, allRecommendedBooks)
+        
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+        
+        closeButton.setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialog.show()
+    }
+    
+    private fun populateBooksGrid(grid: GridLayout, books: List<BookData>) {
+        books.forEachIndexed { index, book ->
+            val bookView = LayoutInflater.from(this).inflate(R.layout.item_book, grid, false)
+            val imageView = bookView.findViewById<ImageView>(R.id.book_image)
+            val titleView = bookView.findViewById<TextView>(R.id.book_title)
+            
+            imageView.setImageResource(book.imageRes)
+            titleView.text = getString(book.titleRes)
+            
+            bookView.setOnClickListener {
+                showBookDetails(book)
+            }
+            
+            val layoutParams = GridLayout.LayoutParams()
+            layoutParams.columnSpec = GridLayout.spec(index % 2, 1f)
+            layoutParams.rowSpec = GridLayout.spec(index / 2, 1f)
+            bookView.layoutParams = layoutParams
+            
+            grid.addView(bookView)
+        }
     }
 }

@@ -1,14 +1,432 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/golden_sand"
+    android:fillViewport="true"
     tools:context=".Profile">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
 
-</FrameLayout>
+        <!-- Profile Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="32dp">
+
+            <ImageView
+                android:id="@+id/profile_image"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/batibook_logo"
+                android:background="@drawable/profile_circle_bg"
+                android:scaleType="centerCrop"
+                android:contentDescription="Profile Picture" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="20dp">
+
+                <TextView
+                    android:id="@+id/profile_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="BatiBook Reader"
+                    android:fontFamily="@font/poppins_bold"
+                    android:textSize="24sp"
+                    android:textColor="#000000"
+                    android:includeFontPadding="false" />
+
+                <TextView
+                    android:id="@+id/profile_email"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="reader@batibook.ph"
+                    android:fontFamily="@font/poppins_regular"
+                    android:textSize="16sp"
+                    android:textColor="#666666"
+                    android:layout_marginTop="4dp"
+                    android:includeFontPadding="false" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Reading Statistics -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Reading Statistics"
+                    android:fontFamily="@font/poppins_bold"
+                    android:textSize="18sp"
+                    android:textColor="#000000"
+                    android:layout_marginBottom="16dp"
+                    android:includeFontPadding="false" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="3">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/books_read_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="12"
+                            android:fontFamily="@font/poppins_bold"
+                            android:textSize="24sp"
+                            android:textColor="#E3AC6C"
+                            android:includeFontPadding="false" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Books Read"
+                            android:fontFamily="@font/poppins_regular"
+                            android:textSize="14sp"
+                            android:textColor="#666666"
+                            android:layout_marginTop="4dp"
+                            android:includeFontPadding="false" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/favorites_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="8"
+                            android:fontFamily="@font/poppins_bold"
+                            android:textSize="24sp"
+                            android:textColor="#E3AC6C"
+                            android:includeFontPadding="false" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Favorites"
+                            android:fontFamily="@font/poppins_regular"
+                            android:textSize="14sp"
+                            android:textColor="#666666"
+                            android:layout_marginTop="4dp"
+                            android:includeFontPadding="false" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/downloads_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="5"
+                            android:fontFamily="@font/poppins_bold"
+                            android:textSize="24sp"
+                            android:textColor="#E3AC6C"
+                            android:includeFontPadding="false" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Downloads"
+                            android:fontFamily="@font/poppins_regular"
+                            android:textSize="14sp"
+                            android:textColor="#666666"
+                            android:layout_marginTop="4dp"
+                            android:includeFontPadding="false" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Settings Options -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Settings"
+                    android:fontFamily="@font/poppins_bold"
+                    android:textSize="18sp"
+                    android:textColor="#000000"
+                    android:layout_marginBottom="16dp"
+                    android:includeFontPadding="false" />
+
+                <!-- Language Setting -->
+                <LinearLayout
+                    android:id="@+id/layout_language_setting"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="12dp"
+                    android:background="@drawable/item_press_effect"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginBottom="8dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/language"
+                        android:contentDescription="Language" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="App Language"
+                        android:fontFamily="@font/poppins_medium"
+                        android:textSize="16sp"
+                        android:textColor="#000000"
+                        android:layout_marginStart="16dp"
+                        android:includeFontPadding="false" />
+
+                    <TextView
+                        android:id="@+id/current_language"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="English"
+                        android:fontFamily="@font/poppins_regular"
+                        android:textSize="14sp"
+                        android:textColor="#666666"
+                        android:includeFontPadding="false" />
+
+                </LinearLayout>
+
+                <!-- Dark Mode Setting -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="12dp"
+                    android:background="@drawable/item_press_effect"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginBottom="8dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/dark_mode"
+                        android:contentDescription="Dark Mode" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Dark Mode"
+                        android:fontFamily="@font/poppins_medium"
+                        android:textSize="16sp"
+                        android:textColor="#000000"
+                        android:layout_marginStart="16dp"
+                        android:includeFontPadding="false" />
+
+                    <Switch
+                        android:id="@+id/dark_mode_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:thumbTint="@color/golden_sand"
+                        android:trackTint="@color/golden_sand" />
+
+                </LinearLayout>
+
+                <!-- Notifications Setting -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="12dp"
+                    android:background="@drawable/item_press_effect"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginBottom="8dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/notification"
+                        android:contentDescription="Notifications" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Notifications"
+                        android:fontFamily="@font/poppins_medium"
+                        android:textSize="16sp"
+                        android:textColor="#000000"
+                        android:layout_marginStart="16dp"
+                        android:includeFontPadding="false" />
+
+                    <Switch
+                        android:id="@+id/notifications_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:thumbTint="@color/golden_sand"
+                        android:trackTint="@color/golden_sand"
+                        android:checked="true" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Account Actions -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Account"
+                    android:fontFamily="@font/poppins_bold"
+                    android:textSize="18sp"
+                    android:textColor="#000000"
+                    android:layout_marginBottom="16dp"
+                    android:includeFontPadding="false" />
+
+                <!-- About BatiBook -->
+                <LinearLayout
+                    android:id="@+id/layout_about"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="12dp"
+                    android:background="@drawable/item_press_effect"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginBottom="8dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/batibook_logo"
+                        android:contentDescription="About BatiBook" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="About BatiBook"
+                        android:fontFamily="@font/poppins_medium"
+                        android:textSize="16sp"
+                        android:textColor="#000000"
+                        android:layout_marginStart="16dp"
+                        android:includeFontPadding="false" />
+
+                </LinearLayout>
+
+                <!-- Logout -->
+                <LinearLayout
+                    android:id="@+id/layout_logout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="12dp"
+                    android:background="@drawable/item_press_effect"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/logout"
+                        android:contentDescription="Logout" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Log Out"
+                        android:fontFamily="@font/poppins_medium"
+                        android:textSize="16sp"
+                        android:textColor="#FF5722"
+                        android:layout_marginStart="16dp"
+                        android:includeFontPadding="false" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+</ScrollView>

@@ -22,8 +22,13 @@ class AboutActivity : AppCompatActivity() {
         titleTextView.text = getString(R.string.about_batibook)
 
         toolbar.setNavigationOnClickListener {
-            onBackPressed()
+            finish() // Use finish() instead of onBackPressed()
         }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        finish()
+        return true
     }
 }
 

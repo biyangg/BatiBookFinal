@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/dialog_bg">
+
+    <!-- Header with close button -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Library Book Details"
+            android:fontFamily="@font/poppins_bold"
+            android:textSize="20sp"
+            android:textColor="#000000"
+            android:layout_centerInParent="true"
+            android:includeFontPadding="false" />
+
+        <ImageView
+            android:id="@+id/close_button"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/close"
+            android:background="@drawable/item_press_effect"
+            android:contentDescription="Close" />
+
+    </RelativeLayout>
+
+    <!-- Book Image -->
+    <ImageView
+        android:id="@+id/dialog_book_image"
+        android:layout_width="150dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="Book Cover"
+        android:scaleType="centerCrop" />
+
+    <!-- Book Title -->
+    <TextView
+        android:id="@+id/dialog_book_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Book Title"
+        android:fontFamily="@font/poppins_bold"
+        android:textSize="18sp"
+        android:textColor="#000000"
+        android:textAlignment="center"
+        android:layout_marginBottom="8dp"
+        android:includeFontPadding="false" />
+
+    <!-- Book Status -->
+    <TextView
+        android:id="@+id/dialog_book_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status"
+        android:fontFamily="@font/poppins_regular"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:textAlignment="center"
+        android:layout_marginBottom="20dp"
+        android:includeFontPadding="false" />
+
+    <!-- Action Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/read_button"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Read Now"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="@color/golden_sand"
+            android:fontFamily="@font/poppins_medium"
+            android:textSize="16sp"
+            android:layout_marginBottom="12dp"
+            android:stateListAnimator="@null"
+            android:elevation="0dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/download_button"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="Download"
+                android:textColor="#000000"
+                android:backgroundTint="@android:color/transparent"
+                android:fontFamily="@font/poppins_medium"
+                android:textSize="16sp"
+                android:stateListAnimator="@null"
+                android:elevation="0dp" />
+
+            <Button
+                android:id="@+id/favorite_button"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="Toggle Favorite"
+                android:textColor="#000000"
+                android:backgroundTint="@android:color/transparent"
+                android:fontFamily="@font/poppins_medium"
+                android:textSize="16sp"
+                android:stateListAnimator="@null"
+                android:elevation="0dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

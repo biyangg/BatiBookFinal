@@ -1,5 +1,6 @@
 package com.abakada.batibooktwo
 
+import android.app.AlertDialog
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -12,6 +13,8 @@ import android.graphics.drawable.GradientDrawable
 import android.content.res.Resources
 import android.widget.GridLayout
 import android.widget.TextView
+import android.widget.Button
+import android.widget.EditText
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -80,8 +83,7 @@ class Library : Fragment() {
         }
 
         ivSearch.setOnClickListener {
-            Toast.makeText(requireContext(), getString(R.string.search), Toast.LENGTH_SHORT).show()
-            // TODO: navigate to search screen
+            showSearchDialog()
         }
     }
 
@@ -167,6 +169,11 @@ class Library : Fragment() {
             layoutParams.setMargins(0, if (index / 2 > 0) (12f.dp).toInt() else 0, 0, 0)
             bookView.layoutParams = layoutParams
             
+            // Add click listener for book
+            bookView.setOnClickListener {
+                showLibraryBookDetails(book)
+            }
+            
             grid.addView(bookView)
         }
     }
@@ -185,6 +192,86 @@ class Library : Fragment() {
 
     private val Float.dp: Float
         get() = this * Resources.getSystem().displayMetrics.density
+
+    private fun showSearchDialog() {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.search_dialog, null)
+        val searchEditText = dialogView.findViewById<EditText>(R.id.search_edit_text)
+        val searchButton = dialogView.findViewById<Button>(R.id.search_button)
+        val cancelButton = dialogView.findViewById<Button>(R.id.cancel_button)
+        
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .create()
+        
+        searchButton.setOnClickListener {
+            val query = searchEditText.text.toString().trim()
+            if (query.isNotEmpty()) {
+                performLibrarySearch(query)
+                dialog.dismiss()
+            } else {
+                Toast.makeText(requireContext(), "Please enter a search term", Toast.LENGTH_SHORT).show()
+            }
+        }
+        
+        cancelButton.setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialog.show()
+    }
+    
+    private fun performLibrarySearch(query: String) {
+        Toast.makeText(requireContext(), "Searching for: $query", Toast.LENGTH_SHORT).show()
+        // TODO: Implement actual search functionality for library books
+    }
+    
+    private fun showLibraryBookDetails(book: LibraryBookData) {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.library_book_details_dialog, null)
+        val bookImage = dialogView.findViewById<ImageView>(R.id.dialog_book_image)
+        val bookTitle = dialogView.findViewById<TextView>(R.id.dialog_book_title)
+        val bookStatus = dialogView.findViewById<TextView>(R.id.dialog_book_status)
+        val downloadButton = dialogView.findViewById<Button>(R.id.download_button)
+        val favoriteButton = dialogView.findViewById<Button>(R.id.favorite_button)
+        val readButton = dialogView.findViewById<Button>(R.id.read_button)
+        val closeButton = dialogView.findViewById<ImageView>(R.id.close_button)
+        
+        bookImage.setImageResource(book.imageRes)
+        bookTitle.text = getString(book.titleRes)
+        bookStatus.text = if (book.isFavorite) "Favorite" else when (book.status) {
+            BookStatus.DOWNLOAD -> "Available for Download"
+            BookStatus.DOWNLOADED -> "Downloaded"
+        }
+        
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .create()
+        
+        downloadButton.setOnClickListener {
+            if (book.status == BookStatus.DOWNLOAD) {
+                Toast.makeText(requireContext(), "Downloading ${getString(book.titleRes)}...", Toast.LENGTH_SHORT).show()
+                // TODO: Implement actual download functionality
+            } else {
+                Toast.makeText(requireContext(), "Book already downloaded", Toast.LENGTH_SHORT).show()
+            }
+        }
+        
+        favoriteButton.setOnClickListener {
+            val message = if (book.isFavorite) "Removed from favorites" else "Added to favorites"
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            // TODO: Implement actual favorite toggle functionality
+        }
+        
+        readButton.setOnClickListener {
+            Toast.makeText(requireContext(), "Opening ${getString(book.titleRes)} for reading", Toast.LENGTH_SHORT).show()
+            // TODO: Implement actual reading functionality
+        }
+        
+        closeButton.setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialog.show()
+    }
 
     companion object {
         /**
