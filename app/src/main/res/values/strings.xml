@@ -59,4 +59,18 @@
     <string name="clear">Clear</string>
     <string name="show_books">Show Books</string>
     <string name="reading_level">Reading Level</string>
+    <string name="profile_picture">Profile Picture</string>
+    <string name="batibook_reader">User Name</string>
+    <string name="gmail">User Gmail</string>
+    <string name="reading_statistics">Reading Statistics</string>
+    <string name="_12">12</string>
+    <string name="books_read">Books Read</string>
+    <string name="_8">8</string>
+    <string name="_5">5</string>
+    <string name="english">English</string>
+    <string name="notifications">Notifications</string>
+    <string name="account">Account</string>
+    <string name="recently_viewed">Recently Viewed</string>
+    <string name="subscribe">Subscription</string>
+    <string name="help_center">Help Center</string>
 </resources>
