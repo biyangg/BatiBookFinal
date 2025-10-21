@@ -11,7 +11,8 @@
         android:layout_width="120dp"
         android:layout_height="190dp"
         android:contentDescription="@string/book_cover"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"
+        android:background="@drawable/book_cover_bg" />
 
     <TextView
         android:id="@+id/book_title"

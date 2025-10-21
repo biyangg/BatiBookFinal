@@ -36,11 +36,12 @@ class Profile : Fragment() {
         val sharedPrefs = requireContext().getSharedPreferences("AppSettings", android.content.Context.MODE_PRIVATE)
         
         // Set current language
-        val savedLanguage = sharedPrefs.getString("language", "English") ?: "English"
-        currentLanguageText.text = savedLanguage
+        val currentLanguage = LanguageManager.getCurrentLanguage(requireContext())
+        val languageDisplayName = LanguageManager.getLanguageDisplayName(currentLanguage)
+        currentLanguageText.text = languageDisplayName
 
-        // Set dark mode switch state
-        val isDarkMode = sharedPrefs.getBoolean("dark_mode", false)
+        // Set dark mode switch state based on current theme
+        val isDarkMode = ThemeManager.isDarkMode(requireContext())
         darkModeSwitch.isChecked = isDarkMode
 
         // Set notifications switch state
@@ -49,10 +50,16 @@ class Profile : Fragment() {
 
         // Dark mode switch listener
         darkModeSwitch.setOnCheckedChangeListener { _, isChecked ->
-            sharedPrefs.edit { putBoolean("dark_mode", isChecked) }
+            val theme = if (isChecked) ThemeManager.THEME_DARK else ThemeManager.THEME_LIGHT
+            ThemeManager.saveTheme(requireContext(), theme)
+            ThemeManager.applyTheme(theme)
+            
             Toast.makeText(requireContext(), 
                 if (isChecked) "Dark mode enabled" else "Dark mode disabled", 
                 Toast.LENGTH_SHORT).show()
+            
+            // Restart activity to apply theme changes
+            requireActivity().recreate()
         }
 
         // Notifications switch listener
@@ -65,20 +72,57 @@ class Profile : Fragment() {
 
         // Language setting click listener
         languageSettingLayout.setOnClickListener {
-            Toast.makeText(requireContext(), "Language settings opened", Toast.LENGTH_SHORT).show()
-            // TODO: Open language selection dialog
+            showLanguageSelectionDialog()
         }
 
         // About BatiBook click listener
         aboutLayout.setOnClickListener {
+            // Toast notification for about navigation - Profile Fragment
+            val context = requireContext().applicationContext
+            val txt = "Opening About BatiBook"
+            val time = Toast.LENGTH_SHORT
+            val toast = Toast.makeText(context, txt, time)
+            toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
+            toast.show()
+            
             val intent = Intent(requireContext(), AboutActivity::class.java)
             startActivity(intent)
         }
+
 
         // Logout click listener
         logoutLayout.setOnClickListener {
             showLogoutDialog()
         }
+    }
+
+    private fun showLanguageSelectionDialog() {
+        val languages = LanguageManager.getAvailableLanguages()
+        val languageNames = languages.map { it.second }.toTypedArray()
+        val currentLanguage = LanguageManager.getCurrentLanguage(requireContext())
+        val currentIndex = languages.indexOfFirst { it.first == currentLanguage }
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Select Language")
+            .setSingleChoiceItems(languageNames, currentIndex) { dialog, which ->
+                val selectedLanguage = languages[which].first
+                LanguageManager.setLanguage(requireContext(), selectedLanguage)
+                
+                Toast.makeText(requireContext(), 
+                    "Language changed to ${languages[which].second}", 
+                    Toast.LENGTH_SHORT).show()
+                
+                // Update the current language display
+                val currentLanguageText = view?.findViewById<TextView>(R.id.current_language)
+                currentLanguageText?.text = languages[which].second
+                
+                dialog.dismiss()
+                
+                // Restart activity to apply language changes
+                requireActivity().recreate()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun showLogoutDialog() {

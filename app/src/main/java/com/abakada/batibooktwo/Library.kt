@@ -1,6 +1,7 @@
 package com.abakada.batibooktwo
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -206,10 +207,29 @@ class Library : Fragment() {
         searchButton.setOnClickListener {
             val query = searchEditText.text.toString().trim()
             if (query.isNotEmpty()) {
-                performLibrarySearch(query)
+                // Toast notification for library search - Library Fragment
+                val context = requireContext().applicationContext
+                val txt = "Searching library for: $query"
+                val time = Toast.LENGTH_SHORT
+                val toast = Toast.makeText(context, txt, time)
+                toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
+                toast.show()
+                
+                // Intent to open SearchActivity
+                val intent = Intent(requireContext(), SearchActivity::class.java).apply {
+                    putExtra("search_query", query)
+                    putExtra("search_source", "library")
+                }
+                startActivity(intent)
                 dialog.dismiss()
             } else {
-                Toast.makeText(requireContext(), "Please enter a search term", Toast.LENGTH_SHORT).show()
+                // Toast notification for empty search - Library Fragment
+                val context = requireContext().applicationContext
+                val txt = "Please enter a search term"
+                val time = Toast.LENGTH_SHORT
+                val toast = Toast.makeText(context, txt, time)
+                toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
+                toast.show()
             }
         }
         
@@ -262,8 +282,22 @@ class Library : Fragment() {
         }
         
         readButton.setOnClickListener {
-            Toast.makeText(requireContext(), "Opening ${getString(book.titleRes)} for reading", Toast.LENGTH_SHORT).show()
-            // TODO: Implement actual reading functionality
+            // Toast notification for library book reading - Library Fragment
+            val context = requireContext().applicationContext
+            val txt = "Opening ${getString(book.titleRes)} for reading"
+            val time = Toast.LENGTH_SHORT
+            val toast = Toast.makeText(context, txt, time)
+            toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
+            toast.show()
+            
+            // Intent to open BookReaderActivity
+            val intent = Intent(requireContext(), BookReaderActivity::class.java).apply {
+                putExtra("book_title", getString(book.titleRes))
+                putExtra("book_author", "Unknown Author")
+                putExtra("book_status", book.status.name)
+            }
+            startActivity(intent)
+            dialog.dismiss()
         }
         
         closeButton.setOnClickListener {

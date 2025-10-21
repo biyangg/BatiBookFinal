@@ -43,7 +43,8 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="16dp"
         android:contentDescription="@string/book_cover"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"
+        android:background="@drawable/book_cover_bg" />
 
     <!-- Book Title -->
     <TextView

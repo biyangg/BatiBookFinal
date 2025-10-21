@@ -78,4 +78,11 @@
     <string name="read">Read</string>
     <string name="download">Download</string>
     <string name="add_to_favorites">Add to Favorites</string>
+    <string name="select_language">Select Language</string>
+    <string name="dark_mode_enabled">Dark mode enabled</string>
+    <string name="dark_mode_disabled">Dark mode disabled</string>
+    <string name="language_changed">Language changed to %1$s</string>
+    <string name="notifications_enabled">Notifications enabled</string>
+    <string name="notifications_disabled">Notifications disabled</string>
+    <string name="filipino">Filipino</string>
 </resources>

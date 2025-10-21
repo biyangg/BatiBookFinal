@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark theme color overrides -->
+    <color name="black">#FFFFFFFF</color>
+    <color name="white">#FF000000</color>
+    <color name="golden_sand">@color/dark_golden_sand</color>
+    <color name="light_gray">@color/dark_surface</color>
+    <color name="medium_gray">#FF666666</color>
+    <color name="brown">@color/dark_golden_sand</color>
+    <color name="primary_color">@color/dark_golden_sand</color>
+    <color name="filter_color_pressed">@color/dark_filter_color_pressed</color>
+    <color name="filter_color">@color/dark_filter_color</color>
+</resources>
+
