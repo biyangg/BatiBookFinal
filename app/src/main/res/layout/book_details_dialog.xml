@@ -2,10 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="24dp"
-    android:background="@drawable/dialog_bg">
+    android:background="@drawable/dialog_bg_2">
 
     <!-- Header with close button -->
     <RelativeLayout
@@ -42,7 +42,7 @@
         android:layout_height="200dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="16dp"
-        android:contentDescription="Book Cover"
+        android:contentDescription="@string/book_cover"
         android:scaleType="centerCrop" />
 
     <!-- Book Title -->
@@ -54,6 +54,18 @@
         android:fontFamily="@font/poppins_bold"
         android:textSize="18sp"
         android:textColor="#000000"
+        android:textAlignment="center"
+        android:layout_marginBottom="10dp"
+        android:includeFontPadding="false" />
+
+    <TextView
+        android:id="@+id/book_author"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/author"
+        android:fontFamily="@font/poppins_medium"
+        android:textSize="14sp"
+        android:textColor="@color/medium_gray"
         android:textAlignment="center"
         android:layout_marginBottom="20dp"
         android:includeFontPadding="false" />
@@ -69,7 +81,20 @@
             android:id="@+id/read_button"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:text="Read Now"
+            android:text="@string/read"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="@color/golden_sand"
+            android:fontFamily="@font/poppins_medium"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp"
+            android:stateListAnimator="@null"
+            android:elevation="0dp" />
+
+        <Button
+            android:id="@+id/audio_button"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="@string/listen"
             android:textColor="#FFFFFF"
             android:backgroundTint="@color/golden_sand"
             android:fontFamily="@font/poppins_medium"
@@ -90,7 +115,7 @@
                 android:layout_height="48dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                android:text="Download"
+                android:text="@string/download"
                 android:textColor="#000000"
                 android:backgroundTint="@android:color/transparent"
                 android:fontFamily="@font/poppins_medium"
@@ -104,7 +129,7 @@
                 android:layout_height="48dp"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="Add to Favorites"
+                android:text="@string/add_to_favorites"
                 android:textColor="#000000"
                 android:backgroundTint="@android:color/transparent"
                 android:fontFamily="@font/poppins_medium"

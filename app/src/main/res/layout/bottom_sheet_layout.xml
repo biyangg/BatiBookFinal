@@ -99,8 +99,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:thumbTint="@color/golden_sand"
-            android:trackTint="@color/golden_sand"
+            android:thumbTint="#000000"
+            android:trackTint="#000000"
             android:minWidth="48dp"
             android:minHeight="48dp"
             tools:ignore="UseSwitchCompatOrMaterialXml" />

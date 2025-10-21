@@ -73,4 +73,9 @@
     <string name="recently_viewed">Recently Viewed</string>
     <string name="subscribe">Subscription</string>
     <string name="help_center">Help Center</string>
+    <string name="author">Dabarkads</string>
+    <string name="listen">Listen</string>
+    <string name="read">Read</string>
+    <string name="download">Download</string>
+    <string name="add_to_favorites">Add to Favorites</string>
 </resources>
