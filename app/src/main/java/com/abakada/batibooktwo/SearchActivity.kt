@@ -5,7 +5,6 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -38,26 +37,12 @@ class SearchActivity : AppCompatActivity() {
         
         if (!searchQuery.isNullOrEmpty()) {
             searchEditText.setText(searchQuery)
-            // Toast notification for search from intent - SearchActivity
-            val context = getApplicationContext()
-            val txt = "Searching from $searchSource: $searchQuery"
-            val time = Toast.LENGTH_SHORT
-            val toast = Toast.makeText(context, txt, time)
-            toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
-            toast.show()
             performSearch(searchQuery)
         }
         
         // Back button functionality
         backButton.setOnClickListener {
             finish()
-            // Toast notification for back navigation - SearchActivity
-            val context = getApplicationContext()
-            val txt = "Returning to previous screen"
-            val time = Toast.LENGTH_SHORT
-            val toast = Toast.makeText(context, txt, time)
-            toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
-            toast.show()
         }
         
         // Search button functionality
@@ -86,23 +71,8 @@ class SearchActivity : AppCompatActivity() {
     
     private fun performSearch(query: String) {
         if (query.isEmpty()) {
-            // Toast notification for empty search - SearchActivity
-            val context = getApplicationContext()
-            val txt = "Please enter a search term"
-            val time = Toast.LENGTH_SHORT
-            val toast = Toast.makeText(context, txt, time)
-            toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
-            toast.show()
             return
         }
-        
-        // Toast notification for search execution - SearchActivity
-        val context = getApplicationContext()
-        val txt = "Searching for: $query"
-        val time = Toast.LENGTH_SHORT
-        val toast = Toast.makeText(context, txt, time)
-        toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
-        toast.show()
         
         // TODO: Implement actual search functionality
         // For now, show a message

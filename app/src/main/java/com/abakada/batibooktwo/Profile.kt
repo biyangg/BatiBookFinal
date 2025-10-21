@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Switch
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.edit
 
 class Profile : Fragment() {
@@ -54,10 +53,6 @@ class Profile : Fragment() {
             ThemeManager.saveTheme(requireContext(), theme)
             ThemeManager.applyTheme(theme)
             
-            Toast.makeText(requireContext(), 
-                if (isChecked) "Dark mode enabled" else "Dark mode disabled", 
-                Toast.LENGTH_SHORT).show()
-            
             // Restart activity to apply theme changes
             requireActivity().recreate()
         }
@@ -65,9 +60,6 @@ class Profile : Fragment() {
         // Notifications switch listener
         notificationsSwitch.setOnCheckedChangeListener { _, isChecked ->
             sharedPrefs.edit { putBoolean("notifications", isChecked) }
-            Toast.makeText(requireContext(), 
-                if (isChecked) "Notifications enabled" else "Notifications disabled", 
-                Toast.LENGTH_SHORT).show()
         }
 
         // Language setting click listener
@@ -77,14 +69,6 @@ class Profile : Fragment() {
 
         // About BatiBook click listener
         aboutLayout.setOnClickListener {
-            // Toast notification for about navigation - Profile Fragment
-            val context = requireContext().applicationContext
-            val txt = "Opening About BatiBook"
-            val time = Toast.LENGTH_SHORT
-            val toast = Toast.makeText(context, txt, time)
-            toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
-            toast.show()
-            
             val intent = Intent(requireContext(), AboutActivity::class.java)
             startActivity(intent)
         }
@@ -108,10 +92,6 @@ class Profile : Fragment() {
                 val selectedLanguage = languages[which].first
                 LanguageManager.setLanguage(requireContext(), selectedLanguage)
                 
-                Toast.makeText(requireContext(), 
-                    "Language changed to ${languages[which].second}", 
-                    Toast.LENGTH_SHORT).show()
-                
                 // Update the current language display
                 val currentLanguageText = view?.findViewById<TextView>(R.id.current_language)
                 currentLanguageText?.text = languages[which].second
@@ -133,8 +113,6 @@ class Profile : Fragment() {
                 // Clear user data
                 val sharedPrefs = requireContext().getSharedPreferences("AppSettings", android.content.Context.MODE_PRIVATE)
                 sharedPrefs.edit().clear().apply()
-                
-                Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show()
                 
                 // TODO: Navigate to login screen or restart app
                 // For now, just show a message

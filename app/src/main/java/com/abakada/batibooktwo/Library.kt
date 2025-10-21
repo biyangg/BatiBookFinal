@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.cardview.widget.CardView
 import android.graphics.drawable.GradientDrawable
 import android.content.res.Resources
@@ -207,14 +206,6 @@ class Library : Fragment() {
         searchButton.setOnClickListener {
             val query = searchEditText.text.toString().trim()
             if (query.isNotEmpty()) {
-                // Toast notification for library search - Library Fragment
-                val context = requireContext().applicationContext
-                val txt = "Searching library for: $query"
-                val time = Toast.LENGTH_SHORT
-                val toast = Toast.makeText(context, txt, time)
-                toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
-                toast.show()
-                
                 // Intent to open SearchActivity
                 val intent = Intent(requireContext(), SearchActivity::class.java).apply {
                     putExtra("search_query", query)
@@ -223,13 +214,7 @@ class Library : Fragment() {
                 startActivity(intent)
                 dialog.dismiss()
             } else {
-                // Toast notification for empty search - Library Fragment
-                val context = requireContext().applicationContext
-                val txt = "Please enter a search term"
-                val time = Toast.LENGTH_SHORT
-                val toast = Toast.makeText(context, txt, time)
-                toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
-                toast.show()
+                // Handle empty search
             }
         }
         
@@ -241,7 +226,6 @@ class Library : Fragment() {
     }
     
     private fun performLibrarySearch(query: String) {
-        Toast.makeText(requireContext(), "Searching for: $query", Toast.LENGTH_SHORT).show()
         // TODO: Implement actual search functionality for library books
     }
     
@@ -268,28 +252,17 @@ class Library : Fragment() {
         
         downloadButton.setOnClickListener {
             if (book.status == BookStatus.DOWNLOAD) {
-                Toast.makeText(requireContext(), "Downloading ${getString(book.titleRes)}...", Toast.LENGTH_SHORT).show()
                 // TODO: Implement actual download functionality
             } else {
-                Toast.makeText(requireContext(), "Book already downloaded", Toast.LENGTH_SHORT).show()
+                // Book already downloaded
             }
         }
         
         favoriteButton.setOnClickListener {
-            val message = if (book.isFavorite) "Removed from favorites" else "Added to favorites"
-            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
             // TODO: Implement actual favorite toggle functionality
         }
         
         readButton.setOnClickListener {
-            // Toast notification for library book reading - Library Fragment
-            val context = requireContext().applicationContext
-            val txt = "Opening ${getString(book.titleRes)} for reading"
-            val time = Toast.LENGTH_SHORT
-            val toast = Toast.makeText(context, txt, time)
-            toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
-            toast.show()
-            
             // Intent to open BookReaderActivity
             val intent = Intent(requireContext(), BookReaderActivity::class.java).apply {
                 putExtra("book_title", getString(book.titleRes))

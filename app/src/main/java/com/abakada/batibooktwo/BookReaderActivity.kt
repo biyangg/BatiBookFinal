@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 class BookReaderActivity : AppCompatActivity() {
@@ -33,60 +32,25 @@ class BookReaderActivity : AppCompatActivity() {
         // Back button functionality
         backButton.setOnClickListener {
             finish()
-            // Toast notification for back navigation - BookReaderActivity
-            val context = getApplicationContext()
-            val txt = "Returning to library"
-            val time = Toast.LENGTH_SHORT
-            val toast = Toast.makeText(context, txt, time)
-            toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
-            toast.show()
         }
         
         // Read button functionality
         readButton.setOnClickListener {
-            // Toast notification for reading functionality - BookReaderActivity
-            val context = getApplicationContext()
-            val txt = "Opening book: $bookTitle"
-            val time = Toast.LENGTH_LONG
-            val toast = Toast.makeText(context, txt, time)
-            toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
-            toast.show()
             // TODO: Implement actual book reading functionality
         }
         
         // Download button functionality
         downloadButton.setOnClickListener {
-            // Toast notification for download functionality - BookReaderActivity
-            val context = getApplicationContext()
-            val txt = "Downloading $bookTitle..."
-            val time = Toast.LENGTH_LONG
-            val toast = Toast.makeText(context, txt, time)
-            toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
-            toast.show()
             // TODO: Implement actual download functionality
         }
         
         // Favorite button functionality
         favoriteButton.setOnClickListener {
-            // Toast notification for favorite functionality - BookReaderActivity
-            val context = getApplicationContext()
-            val txt = "Added $bookTitle to favorites"
-            val time = Toast.LENGTH_SHORT
-            val toast = Toast.makeText(context, txt, time)
-            toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
-            toast.show()
             // TODO: Implement actual favorite functionality
         }
         
         // Share button functionality
         shareButton.setOnClickListener {
-            // Toast notification for share functionality - BookReaderActivity
-            val context = getApplicationContext()
-            val txt = "Sharing $bookTitle"
-            val time = Toast.LENGTH_SHORT
-            val toast = Toast.makeText(context, txt, time)
-            toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
-            toast.show()
             // TODO: Implement actual share functionality
         }
     }
