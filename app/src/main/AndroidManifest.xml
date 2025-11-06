@@ -51,6 +51,14 @@
             android:screenOrientation="fullSensor"
             tools:ignore="DiscouragedApi" />
             
+        <!-- Story Reader Activity (Page-by-page with quiz) -->
+        <activity
+            android:name=".StoryReaderActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="fullSensor"
+            tools:ignore="DiscouragedApi" />
+            
         <!-- Settings Activity -->
         <activity
             android:name=".SettingsActivity"

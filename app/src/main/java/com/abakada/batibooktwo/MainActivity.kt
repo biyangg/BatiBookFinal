@@ -738,19 +738,12 @@ class MainActivity : AppCompatActivity() {
         }
         
         readButton.setOnClickListener {
-            // Toast notification for book reading - MainActivity
-            val context = applicationContext
-            val txt = "Opening ${getString(book.titleRes)} for reading"
-            val time = Toast.LENGTH_SHORT
-            val toast = Toast.makeText(context, txt, time)
-            toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 0)
-            toast.show()
-            
-            // Intent to open BookReaderActivity
-            val intent = Intent(this, BookReaderActivity::class.java).apply {
-                putExtra("book_title", getString(book.titleRes))
-                putExtra("book_author", "Unknown Author")
-                putExtra("book_cover", book.imageRes)
+            // Open StoryReaderActivity for page-by-page reading
+            val intent = Intent(this, StoryReaderActivity::class.java).apply {
+                putExtra("story_title", getString(book.titleRes))
+                putExtra("story_id", "story_${book.titleRes}")
+                // You can pass actual story content here, or it will load sample story
+                putExtra("story_content", "") // Empty will trigger sample story
             }
             startActivity(intent)
             dialog.dismiss()

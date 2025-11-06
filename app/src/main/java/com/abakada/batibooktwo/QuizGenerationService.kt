@@ -213,11 +213,11 @@ class QuizGenerationService private constructor(private val context: android.con
                 // Create question
                 val questionText = when {
                     sentence.contains("who", ignoreCase = true) ->
-                        "Who ${sentence.split(Regex("who", RegexOption.IGNORE_CASE))[1]}"
+                        "Who ${sentence.split(Regex("who", RegexOption.IGNORE_CASE)).lastOrNull()?.trim() ?: "was in the story?"}"
                     sentence.contains("what", ignoreCase = true) ->
-                        "What ${sentence.split(Regex("what", RegexOption.IGNORE_CASE))[1]}"
+                        "What ${sentence.split(Regex("what", RegexOption.IGNORE_CASE)).lastOrNull()?.trim() ?: "happened in the story?"}"
                     sentence.contains("where", ignoreCase = true) ->
-                        "Where ${sentence.split(Regex("where", RegexOption.IGNORE_CASE))[1]}"
+                        "Where ${sentence.split(Regex("where", RegexOption.IGNORE_CASE)).lastOrNull()?.trim() ?: "did this happen?"}"
                     else -> "What happened: ${sentence.take(50)}...?"
                 }
                 
