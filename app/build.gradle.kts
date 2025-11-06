@@ -54,6 +54,12 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.androidx.gridlayout)
+    implementation(libs.androidx.recyclerview)
     implementation(platform(libs.firebase.bom))
     implementation(libs.google.firebase.analytics)
+    implementation(libs.google.firebase.auth)
+    implementation(libs.google.firebase.firestore)
+    implementation(libs.volley)
+    implementation(libs.glide)
+    implementation(libs.gson)
 }

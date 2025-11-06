@@ -19,7 +19,7 @@
             android:text="Library Book Details"
             android:fontFamily="@font/poppins_bold"
             android:textSize="20sp"
-            android:textColor="#000000"
+            android:textColor="@color/black"
             android:layout_centerInParent="true"
             android:includeFontPadding="false" />
 
@@ -53,7 +53,7 @@
         android:text="Book Title"
         android:fontFamily="@font/poppins_bold"
         android:textSize="18sp"
-        android:textColor="#000000"
+        android:textColor="@color/black"
         android:textAlignment="center"
         android:layout_marginBottom="8dp"
         android:includeFontPadding="false" />
@@ -104,7 +104,7 @@
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
                 android:text="Download"
-                android:textColor="#000000"
+                android:textColor="@color/black"
                 android:backgroundTint="@android:color/transparent"
                 android:fontFamily="@font/poppins_medium"
                 android:textSize="16sp"
@@ -118,7 +118,7 @@
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
                 android:text="Toggle Favorite"
-                android:textColor="#000000"
+                android:textColor="@color/black"
                 android:backgroundTint="@android:color/transparent"
                 android:fontFamily="@font/poppins_medium"
                 android:textSize="16sp"

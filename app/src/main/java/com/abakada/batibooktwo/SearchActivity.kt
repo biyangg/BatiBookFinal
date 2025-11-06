@@ -1,20 +1,25 @@
 package com.abakada.batibooktwo
 
 import android.os.Bundle
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 
+/**
+ * SearchActivity - Simple Search Functionality
+ * 
+ * This activity provides search functionality for local stories in the app.
+ * Users can search for stories by title or keywords.
+ */
 class SearchActivity : AppCompatActivity() {
     
     private lateinit var searchEditText: EditText
     private lateinit var searchButton: Button
     private lateinit var backButton: ImageView
-    private lateinit var resultsRecyclerView: RecyclerView
     private lateinit var noResultsText: TextView
     
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,15 +30,10 @@ class SearchActivity : AppCompatActivity() {
         searchEditText = findViewById(R.id.search_edit_text)
         searchButton = findViewById(R.id.search_button)
         backButton = findViewById(R.id.back_button)
-        resultsRecyclerView = findViewById(R.id.results_recycler_view)
         noResultsText = findViewById(R.id.no_results_text)
         
-        // Set up RecyclerView
-        resultsRecyclerView.layoutManager = LinearLayoutManager(this)
-        
-        // Get search query from intent
+        // Get search query from intent (passed from MainActivity)
         val searchQuery = intent.getStringExtra("search_query")
-        val searchSource = intent.getStringExtra("search_source")
         
         if (!searchQuery.isNullOrEmpty()) {
             searchEditText.setText(searchQuery)
@@ -52,7 +52,7 @@ class SearchActivity : AppCompatActivity() {
         
         // Search on Enter key press
         searchEditText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 performSearch()
                 true
             } else {
@@ -71,13 +71,12 @@ class SearchActivity : AppCompatActivity() {
     
     private fun performSearch(query: String) {
         if (query.isEmpty()) {
+            Toast.makeText(this, "Please enter a search term", Toast.LENGTH_SHORT).show()
             return
         }
         
-        // TODO: Implement actual search functionality
-        // For now, show a message
-        noResultsText.text = "Search results for: \"$query\"\n\nThis feature will be implemented in the next update."
+        // TODO: Implement local story search functionality
+        noResultsText.text = "Search results for: \"$query\"\n\nThis feature will search through local stories."
         noResultsText.visibility = TextView.VISIBLE
-        resultsRecyclerView.visibility = RecyclerView.GONE
     }
 }

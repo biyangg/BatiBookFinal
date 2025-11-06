@@ -33,7 +33,7 @@
         android:fontFamily="@font/poppins_medium"
         android:gravity="center"
         android:maxLines="2"
-        android:textColor="#000"
+        android:textColor="@color/black"
         android:textSize="14sp"
         android:lineSpacingExtra="2dp" />
 

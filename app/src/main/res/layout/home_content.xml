@@ -70,7 +70,7 @@
                 android:paddingStart="12dp"
                 android:paddingEnd="40dp"
                 android:singleLine="true"
-                android:textColor="@android:color/black"
+                android:textColor="@color/black"
                 android:textColorHint="#808080"
                 tools:ignore="TextContrastCheck,VisualLintTextFieldSize,TouchTargetSizeCheck" />
 
@@ -99,7 +99,7 @@
                 android:text="@string/featured_stories"
                 android:fontFamily="@font/poppins_bold"
                 android:includeFontPadding="false"
-                android:textColor="#000000"
+                android:textColor="@color/black"
                 android:layout_marginStart="0dp"
                 android:textSize="20sp" />
 
@@ -155,7 +155,7 @@
                 android:text="@string/recommended_for_you"
                 android:fontFamily="@font/poppins_bold"
                 android:includeFontPadding="false"
-                android:textColor="#000000"
+                android:textColor="@color/black"
                 android:layout_marginStart="0dp"
                 android:textSize="20sp" />
 
@@ -202,7 +202,7 @@
             android:text="@string/categories"
             android:fontFamily="@font/poppins_bold"
             android:includeFontPadding="false"
-            android:textColor="#000000"
+            android:textColor="@color/black"
             android:textSize="20sp"
             android:paddingHorizontal="16dp"
             android:layout_marginTop="20dp" />

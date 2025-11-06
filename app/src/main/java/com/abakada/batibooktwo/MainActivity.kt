@@ -1,5 +1,6 @@
 package com.abakada.batibooktwo
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
@@ -50,11 +51,11 @@ class MainActivity : AppCompatActivity() {
         initializeSeeMoreButtons()
         
         // Toast notification for app startup - MainActivity
-        val context = getApplicationContext()
+        val context = applicationContext
         val txt = "Welcome to BatiBook! Start your reading journey"
         val time = Toast.LENGTH_LONG
         val toast = Toast.makeText(context, txt, time)
-        toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
+        toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 0)
         toast.show()
 
         // Bottom navigation listener
@@ -62,35 +63,14 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.library -> {
                     replaceFragment(Library())
-                    // Toast notification for library navigation - MainActivity
-                    val context = getApplicationContext()
-                    val txt = "Opening Library"
-                    val time = Toast.LENGTH_SHORT
-                    val toast = Toast.makeText(context, txt, time)
-                    toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
-                    toast.show()
                     true
                 }
                 R.id.profile -> {
                     replaceFragment(Profile())
-                    // Toast notification for profile navigation - MainActivity
-                    val context = getApplicationContext()
-                    val txt = "Opening Profile"
-                    val time = Toast.LENGTH_SHORT
-                    val toast = Toast.makeText(context, txt, time)
-                    toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
-                    toast.show()
                     true
                 }
                 R.id.home -> {
                     showHome()
-                    // Toast notification for home navigation - MainActivity
-                    val context = getApplicationContext()
-                    val txt = "Welcome Home"
-                    val time = Toast.LENGTH_SHORT
-                    val toast = Toast.makeText(context, txt, time)
-                    toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
-                    toast.show()
                     true
                 }
                 else -> false
@@ -102,11 +82,11 @@ class MainActivity : AppCompatActivity() {
             if (!isBottomSheetVisible) {
                 showBottomSheet()
                 // Toast notification for menu opening - MainActivity
-                val context = getApplicationContext()
+                val context = applicationContext
                 val txt = "Opening Settings Menu"
                 val time = Toast.LENGTH_SHORT
                 val toast = Toast.makeText(context, txt, time)
-                toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
+                toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 0)
                 toast.show()
             }
         }
@@ -117,11 +97,11 @@ class MainActivity : AppCompatActivity() {
             if (!isFilterBottomSheetVisible) {
                 showFilterBottomSheet()
                 // Toast notification for filter opening - MainActivity
-                val context = getApplicationContext()
+                val context = applicationContext
                 val txt = "Opening Book Filters"
                 val time = Toast.LENGTH_SHORT
                 val toast = Toast.makeText(context, txt, time)
-                toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
+                toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 0)
                 toast.show()
             }
         }
@@ -163,6 +143,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.home_content).visibility = View.VISIBLE
     }
 
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
     private fun showBottomSheet() {
         val inflater = LayoutInflater.from(this)
         bottomSheetView = inflater.inflate(R.layout.bottom_sheet_layout, binding.bottomSheetContainer, false)
@@ -226,11 +207,11 @@ class MainActivity : AppCompatActivity() {
                     val selected = languages[position]
                     if (selected != savedLang) {
                         sharedPrefs.edit { putString("language", selected) }
-                        val context = getApplicationContext()
+                        val context = applicationContext
                         val txt = "Language set to $selected"
                         val time = Toast.LENGTH_SHORT
                         val toast = Toast.makeText(context, txt, time)
-                        toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
+                        toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 0)
                         toast.show()
                     }
                 }
@@ -249,11 +230,11 @@ class MainActivity : AppCompatActivity() {
             darkModeSwitch.setOnCheckedChangeListener { _, isChecked ->
                 sharedPrefs.edit { putBoolean("dark_mode", isChecked) }
                 // Toast notification for dark mode toggle - MainActivity
-                val context = getApplicationContext()
+                val context = applicationContext
                 val txt = if (isChecked) "Dark mode enabled" else "Dark mode disabled"
                 val time = Toast.LENGTH_SHORT
                 val toast = Toast.makeText(context, txt, time)
-                toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
+                toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 0)
                 toast.show()
             }
         }
@@ -264,11 +245,11 @@ class MainActivity : AppCompatActivity() {
             hideBottomSheet()
             
             // Toast notification for about navigation - MainActivity
-            val context = getApplicationContext()
+            val context = applicationContext
             val txt = "Opening About BatiBook"
             val time = Toast.LENGTH_SHORT
             val toast = Toast.makeText(context, txt, time)
-            toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
+            toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 0)
             toast.show()
 
             // Intent to navigate to AboutActivity
@@ -447,6 +428,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun initializeFilterUI() {
         val readingLevelGrid = filterBottomSheetView?.findViewById<GridLayout>(R.id.reading_level_grid)
         val categoriesGrid = filterBottomSheetView?.findViewById<GridLayout>(R.id.categories_grid)
@@ -463,7 +445,7 @@ class MainActivity : AppCompatActivity() {
                     btnShowBooks.isClickable = true
                     btnShowBooks.alpha = 1f
                     btnShowBooks.text = "Show Books (${totalSelected})"
-                    btnShowBooks.contentDescription = "Show Books, ${totalSelected} filters selected"
+                    btnShowBooks.contentDescription = "Show Books, $totalSelected filters selected"
                 } else {
                     btnShowBooks.isEnabled = false
                     btnShowBooks.isClickable = false
@@ -567,11 +549,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun applyFilters() {
         if (selectedReadingLevels.isEmpty() && selectedCategories.isEmpty()) {
-            val context = getApplicationContext()
+            val context = applicationContext
             val txt = "Please select at least one filter option"
             val time = Toast.LENGTH_SHORT
             val toast = Toast.makeText(context, txt, time)
-            toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
+            toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 0)
             toast.show()
             return
         }
@@ -580,14 +562,15 @@ class MainActivity : AppCompatActivity() {
         showFilteredBooks()
         
         val message = "Filtered by: Reading Levels ${selectedReadingLevels.joinToString()}, Categories: ${selectedCategories.joinToString()}"
-        val context = getApplicationContext()
+        val context = applicationContext
         val txt = message
         val time = Toast.LENGTH_SHORT
         val toast = Toast.makeText(context, txt, time)
-        toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
+        toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 0)
         toast.show()
     }
     
+    @SuppressLint("SetTextI18n")
     private fun showFilteredBooks() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.filtered_books_dialog, null)
         val title = dialogView.findViewById<TextView>(R.id.dialog_title)
@@ -694,21 +677,21 @@ class MainActivity : AppCompatActivity() {
     
     private fun performSearch(query: String) {
         if (query.isBlank()) {
-            val context = getApplicationContext()
+            val context = applicationContext
             val txt = "Please enter a search term"
             val time = Toast.LENGTH_SHORT
             val toast = Toast.makeText(context, txt, time)
-            toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
+            toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 0)
             toast.show()
             return
         }
         
         // Toast notification for search execution - MainActivity
-        val context = getApplicationContext()
+        val context = applicationContext
         val txt = "Searching for: $query"
         val time = Toast.LENGTH_SHORT
         val toast = Toast.makeText(context, txt, time)
-        toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
+        toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 0)
         toast.show()
         
         // Intent to open SearchActivity
@@ -735,32 +718,32 @@ class MainActivity : AppCompatActivity() {
             .create()
         
         downloadButton.setOnClickListener {
-            val context = getApplicationContext()
+            val context = applicationContext
             val txt = "Downloading ${getString(book.titleRes)}..."
             val time = Toast.LENGTH_SHORT
             val toast = Toast.makeText(context, txt, time)
-            toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
+            toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 0)
             toast.show()
             // TODO: Implement actual download functionality
         }
         
         favoriteButton.setOnClickListener {
-            val context = getApplicationContext()
+            val context = applicationContext
             val txt = "Added ${getString(book.titleRes)} to favorites"
             val time = Toast.LENGTH_SHORT
             val toast = Toast.makeText(context, txt, time)
-            toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
+            toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 0)
             toast.show()
             // TODO: Implement actual favorite functionality
         }
         
         readButton.setOnClickListener {
             // Toast notification for book reading - MainActivity
-            val context = getApplicationContext()
+            val context = applicationContext
             val txt = "Opening ${getString(book.titleRes)} for reading"
             val time = Toast.LENGTH_SHORT
             val toast = Toast.makeText(context, txt, time)
-            toast.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL, 0, 0)
+            toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 0)
             toast.show()
             
             // Intent to open BookReaderActivity
@@ -856,6 +839,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
+    @SuppressLint("SetTextI18n")
     private fun showAllFeaturedStories() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.all_books_dialog, null)
         val title = dialogView.findViewById<TextView>(R.id.dialog_title)
@@ -886,6 +870,7 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
     
+    @SuppressLint("SetTextI18n")
     private fun showAllRecommendedBooks() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.all_books_dialog, null)
         val title = dialogView.findViewById<TextView>(R.id.dialog_title)

@@ -44,7 +44,7 @@
                     android:text="@string/batibook_reader"
                     android:fontFamily="@font/poppins_bold"
                     android:textSize="24sp"
-                    android:textColor="#000000"
+                    android:textColor="@color/black"
                     android:includeFontPadding="false" />
 
                 <TextView
@@ -84,7 +84,7 @@
                     android:text="@string/reading_statistics"
                     android:fontFamily="@font/poppins_bold"
                     android:textSize="18sp"
-                    android:textColor="#000000"
+                    android:textColor="@color/black"
                     android:layout_marginBottom="16dp"
                     android:includeFontPadding="false" />
 
@@ -110,7 +110,7 @@
                             android:text="@string/_12"
                             android:fontFamily="@font/poppins_bold"
                             android:textSize="24sp"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:includeFontPadding="false" />
 
                         <TextView
@@ -139,7 +139,7 @@
                             android:text="@string/_8"
                             android:fontFamily="@font/poppins_bold"
                             android:textSize="24sp"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:includeFontPadding="false" />
 
                         <TextView
@@ -168,7 +168,7 @@
                             android:text="@string/_5"
                             android:fontFamily="@font/poppins_bold"
                             android:textSize="24sp"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:includeFontPadding="false" />
 
                         <TextView
@@ -208,7 +208,7 @@
                     android:text="@string/settings"
                     android:fontFamily="@font/poppins_bold"
                     android:textSize="18sp"
-                    android:textColor="#000000"
+                    android:textColor="@color/black"
                     android:layout_marginBottom="16dp"
                     android:includeFontPadding="false" />
 
@@ -238,7 +238,7 @@
                         android:text="@string/app_language"
                         android:fontFamily="@font/poppins_medium"
                         android:textSize="16sp"
-                        android:textColor="#000000"
+                        android:textColor="@color/black"
                         android:layout_marginStart="16dp"
                         android:includeFontPadding="false" />
 
@@ -278,7 +278,7 @@
                         android:text="@string/dark_mode"
                         android:fontFamily="@font/poppins_medium"
                         android:textSize="16sp"
-                        android:textColor="#000000"
+                        android:textColor="@color/black"
                         android:layout_marginStart="16dp"
                         android:includeFontPadding="false" />
 
@@ -318,7 +318,7 @@
                         android:text="@string/notifications"
                         android:fontFamily="@font/poppins_medium"
                         android:textSize="16sp"
-                        android:textColor="#000000"
+                        android:textColor="@color/black"
                         android:layout_marginStart="16dp"
                         android:includeFontPadding="false" />
 
@@ -357,7 +357,7 @@
                     android:text="@string/account"
                     android:fontFamily="@font/poppins_bold"
                     android:textSize="18sp"
-                    android:textColor="#000000"
+                    android:textColor="@color/black"
                     android:layout_marginBottom="16dp"
                     android:includeFontPadding="false" />
 
@@ -387,7 +387,7 @@
                         android:text="@string/recently_viewed"
                         android:fontFamily="@font/poppins_medium"
                         android:textSize="16sp"
-                        android:textColor="#000000"
+                        android:textColor="@color/black"
                         android:layout_marginStart="16dp"
                         android:includeFontPadding="false" />
                 </LinearLayout>
@@ -418,7 +418,7 @@
                         android:text="@string/subscribe"
                         android:fontFamily="@font/poppins_medium"
                         android:textSize="16sp"
-                        android:textColor="#000000"
+                        android:textColor="@color/black"
                         android:layout_marginStart="16dp"
                         android:includeFontPadding="false" />
                 </LinearLayout>
@@ -449,7 +449,7 @@
                         android:text="@string/help_center"
                         android:fontFamily="@font/poppins_medium"
                         android:textSize="16sp"
-                        android:textColor="#000000"
+                        android:textColor="@color/black"
                         android:layout_marginStart="16dp"
                         android:includeFontPadding="false" />
                 </LinearLayout>
@@ -480,7 +480,7 @@
                         android:text="@string/about_batibook"
                         android:fontFamily="@font/poppins_medium"
                         android:textSize="16sp"
-                        android:textColor="#000000"
+                        android:textColor="@color/black"
                         android:layout_marginStart="16dp"
                         android:includeFontPadding="false" />
                 </LinearLayout>
