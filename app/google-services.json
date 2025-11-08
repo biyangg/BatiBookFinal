@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "769734519927",
-    "project_id": "batibook-project",
-    "storage_bucket": "batibook-project.firebasestorage.app"
+    "project_number": "475553498013",
+    "project_id": "batibook-5f717",
+    "storage_bucket": "batibook-5f717.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:769734519927:android:14e62dd065b36918bb2a72",
+        "mobilesdk_app_id": "1:475553498013:android:b113fdaa88a0591a3ea574",
         "android_client_info": {
           "package_name": "com.abakada.batibooktwo"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCPKFrmuksVJg5NWCOBSqPUc66htkVDRH8"
+          "current_key": "AIzaSyDl8yyFjUPhHxWSgVq7Rhil6Q20mTDscpM"
         }
       ],
       "services": {

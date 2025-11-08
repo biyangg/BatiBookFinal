@@ -30,6 +30,9 @@ class Library : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+    
+    private lateinit var bookGrid: GridLayout
+    private var currentFilter = "all"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,40 +57,239 @@ class Library : Fragment() {
         val btnFavorites = view.findViewById<CardView>(R.id.btn_favorites)
         val btnDownloads = view.findViewById<CardView>(R.id.btn_downloads)
         val ivSearch = view.findViewById<ImageView>(R.id.ivSearch)
-        val bookGrid = view.findViewById<GridLayout>(R.id.bookGrid)
+        bookGrid = view.findViewById<GridLayout>(R.id.bookGrid)
+        
+        // Initialize Library Service
+        val libraryService = LibraryService.getInstance()
+        val authService = FirebaseAuthService.getInstance()
+        
+        // Check if user is authenticated
+        if (!authService.isUserAuthenticated()) {
+            // Show message to sign in
+            bookGrid.removeAllViews()
+            val messageView = TextView(requireContext()).apply {
+                text = "Please sign in to view your library"
+                textSize = 16f
+                gravity = android.view.Gravity.CENTER
+                setTextColor(resources.getColor(R.color.black, null))
+                layoutParams = GridLayout.LayoutParams().apply {
+                    columnSpec = GridLayout.spec(0, 2)
+                    rowSpec = GridLayout.spec(0)
+                }
+            }
+            bookGrid.addView(messageView)
+        } else {
+            // Load books from Firestore - default to "reading" section
+            currentFilter = "reading"
+            loadBooksFromFirestore("reading")
+        }
 
-        // Initialize with sample books
-        initializeBooks(bookGrid)
-
-        // Initial state: Books selected
+        // Initial state: Reading selected (changed from Books)
         updateTopNavState(
-            selected = TopNav.BOOKS,
+            selected = TopNav.READING,
             btnBooks = btnBooks,
             btnFavorites = btnFavorites,
             btnDownloads = btnDownloads
         )
 
         btnBooks.setOnClickListener {
-            updateTopNavState(TopNav.BOOKS, btnBooks, btnFavorites, btnDownloads)
-            filterBooks(bookGrid, TopNav.BOOKS)
+            updateTopNavState(TopNav.READING, btnBooks, btnFavorites, btnDownloads)
+            if (authService.isUserAuthenticated()) {
+                currentFilter = "reading"
+                loadBooksFromFirestore("reading")
+            }
         }
 
         btnFavorites.setOnClickListener {
             updateTopNavState(TopNav.FAVORITES, btnBooks, btnFavorites, btnDownloads)
-            filterBooks(bookGrid, TopNav.FAVORITES)
+            if (authService.isUserAuthenticated()) {
+                currentFilter = "favorites"
+                loadBooksFromFirestore("favorites")
+            }
         }
 
         btnDownloads.setOnClickListener {
             updateTopNavState(TopNav.DOWNLOADS, btnBooks, btnFavorites, btnDownloads)
-            filterBooks(bookGrid, TopNav.DOWNLOADS)
+            if (authService.isUserAuthenticated()) {
+                currentFilter = "downloads"
+                loadBooksFromFirestore("downloads")
+            }
         }
 
         ivSearch.setOnClickListener {
             showSearchDialog()
         }
     }
+    
+    override fun onResume() {
+        super.onResume()
+        // Refresh library when fragment resumes (e.g., after adding a book)
+        val authService = FirebaseAuthService.getInstance()
+        if (authService.isUserAuthenticated() && ::bookGrid.isInitialized) {
+            loadBooksFromFirestore(currentFilter)
+        }
+    }
+    
+    /**
+     * Load books from Firestore
+     * Filter types: "reading" (books with progress), "favorites", "downloads"
+     */
+    private fun loadBooksFromFirestore(filter: String) {
+        bookGrid.removeAllViews()
+        
+        // Show loading indicator
+        val loadingView = TextView(requireContext()).apply {
+            text = "Loading..."
+            textSize = 16f
+            gravity = android.view.Gravity.CENTER
+            setTextColor(resources.getColor(R.color.black, null))
+            layoutParams = GridLayout.LayoutParams().apply {
+                columnSpec = GridLayout.spec(0, 2)
+                rowSpec = GridLayout.spec(0)
+            }
+        }
+        bookGrid.addView(loadingView)
+        
+        val libraryService = LibraryService.getInstance()
+        val progressService = ProgressTrackingService.getInstance()
+        
+        if (filter == "reading") {
+            // Load books with reading progress
+            progressService.getAllProgress(object : ProgressTrackingService.ProgressListCallback {
+                override fun onSuccess(progressList: List<ProgressTrackingService.ReadingProgress>) {
+                    if (progressList.isEmpty()) {
+                        showEmptyMessage("No reading progress yet. Start reading a story!")
+                        return
+                    }
+                    
+                    // Get book IDs from progress
+                    val bookIds = progressList.map { it.storyId }.toSet()
+                    
+                    // Load all library books and filter by those with progress
+                    libraryService.getLibraryBooks("all", object : LibraryService.LibraryListCallback {
+                        override fun onSuccess(books: List<LibraryService.LibraryBook>) {
+                            // Filter books that have reading progress
+                            val readingBooks = books.filter { book ->
+                                // Match by bookId or storyId pattern
+                                bookIds.contains(book.bookId) || 
+                                bookIds.any { it.contains(book.bookId) || book.bookId.contains(it) }
+                            }
+                            
+                            if (readingBooks.isEmpty()) {
+                                // Try to create books from progress data
+                                val progressBooks = progressList.map { progress ->
+                                    LibraryBookData(
+                                        title = progress.storyTitle,
+                                        imageRes = R.drawable.book1,
+                                        titleRes = R.string.dog_and_cat,
+                                        status = BookStatus.DOWNLOADED,
+                                        isFavorite = false
+                                    )
+                                }
+                                populateGrid(bookGrid, progressBooks)
+                            } else {
+                                val libraryBooks = readingBooks.map { book ->
+                                    LibraryBookData(
+                                        title = book.bookTitle,
+                                        imageRes = book.bookImageRes.toIntOrNull() ?: R.drawable.book1,
+                                        titleRes = book.bookTitleRes.toIntOrNull() ?: R.string.dog_and_cat,
+                                        status = if (book.isDownloaded) BookStatus.DOWNLOADED else BookStatus.DOWNLOAD,
+                                        isFavorite = book.isFavorite
+                                    )
+                                }
+                                populateGrid(bookGrid, libraryBooks)
+                            }
+                        }
+                        
+                        override fun onError(error: String) {
+                            // If library service fails, try to show progress books directly
+                            val progressBooks = progressList.map { progress ->
+                                LibraryBookData(
+                                    title = progress.storyTitle,
+                                    imageRes = R.drawable.book1,
+                                    titleRes = R.string.dog_and_cat,
+                                    status = BookStatus.DOWNLOADED,
+                                    isFavorite = false
+                                )
+                            }
+                            if (progressBooks.isNotEmpty()) {
+                                populateGrid(bookGrid, progressBooks)
+                            } else {
+                                showErrorMessage("Error loading reading progress: $error")
+                            }
+                        }
+                    })
+                }
+                
+                override fun onError(error: String) {
+                    showErrorMessage("Error loading reading progress: $error")
+                }
+            })
+        } else {
+            // Load favorites or downloads
+            libraryService.getLibraryBooks(filter, object : LibraryService.LibraryListCallback {
+                override fun onSuccess(books: List<LibraryService.LibraryBook>) {
+                    bookGrid.removeAllViews()
+                    
+                    if (books.isEmpty()) {
+                        showEmptyMessage(when (filter) {
+                            "favorites" -> "No favorite books yet"
+                            "downloads" -> "No downloaded books yet"
+                            else -> "Your library is empty"
+                        })
+                    } else {
+                        // Convert Firestore books to LibraryBookData
+                        val libraryBooks = books.map { book ->
+                            LibraryBookData(
+                                title = book.bookTitle,
+                                imageRes = book.bookImageRes.toIntOrNull() ?: R.drawable.book1,
+                                titleRes = book.bookTitleRes.toIntOrNull() ?: R.string.dog_and_cat,
+                                status = if (book.isDownloaded) BookStatus.DOWNLOADED else BookStatus.DOWNLOAD,
+                                isFavorite = book.isFavorite
+                            )
+                        }
+                        populateGrid(bookGrid, libraryBooks)
+                    }
+                }
+                
+                override fun onError(error: String) {
+                    showErrorMessage("Error loading library: $error")
+                }
+            })
+        }
+    }
+    
+    private fun showEmptyMessage(message: String) {
+        bookGrid.removeAllViews()
+        val emptyView = TextView(requireContext()).apply {
+            text = message
+            textSize = 16f
+            gravity = android.view.Gravity.CENTER
+            setTextColor(resources.getColor(R.color.black, null))
+            layoutParams = GridLayout.LayoutParams().apply {
+                columnSpec = GridLayout.spec(0, 2)
+                rowSpec = GridLayout.spec(0)
+            }
+        }
+        bookGrid.addView(emptyView)
+    }
+    
+    private fun showErrorMessage(message: String) {
+        bookGrid.removeAllViews()
+        val errorView = TextView(requireContext()).apply {
+            text = message
+            textSize = 16f
+            gravity = android.view.Gravity.CENTER
+            setTextColor(android.graphics.Color.RED)
+            layoutParams = GridLayout.LayoutParams().apply {
+                columnSpec = GridLayout.spec(0, 2)
+                rowSpec = GridLayout.spec(0)
+            }
+        }
+        bookGrid.addView(errorView)
+    }
 
-    private enum class TopNav { BOOKS, FAVORITES, DOWNLOADS }
+    private enum class TopNav { READING, FAVORITES, DOWNLOADS }
 
     private fun updateTopNavState(
         selected: TopNav,
@@ -95,11 +297,11 @@ class Library : Fragment() {
         btnFavorites: CardView,
         btnDownloads: CardView
     ) {
-        val selectedColor = 0xFFE3AC6C.toInt() // #E3AC6C
-        val unselectedColor = 0xFFFDFDFC.toInt() // #FDFDFC
+        val selectedColor = resources.getColor(R.color.golden_sand, null)
+        val unselectedColor = resources.getColor(R.color.filter_color, null)
 
         // Update all buttons to unselected state first
-        btnBooks.setCardBackgroundColor(if (selected == TopNav.BOOKS) selectedColor else unselectedColor)
+        btnBooks.setCardBackgroundColor(if (selected == TopNav.READING) selectedColor else unselectedColor)
         btnFavorites.setCardBackgroundColor(if (selected == TopNav.FAVORITES) selectedColor else unselectedColor)
         btnDownloads.setCardBackgroundColor(if (selected == TopNav.DOWNLOADS) selectedColor else unselectedColor)
 
@@ -109,37 +311,6 @@ class Library : Fragment() {
         btnDownloads.cardElevation = 0f
     }
 
-    private fun initializeBooks(grid: GridLayout) {
-        val books = listOf(
-            // EXACTLY as in provided design
-            LibraryBookData("Dog and Cat", R.drawable.book1, R.string.dog_and_cat, BookStatus.DOWNLOAD, isFavorite = false),
-            LibraryBookData("Lito's Umbrella", R.drawable.book3, R.string.lito_s_umbrella, BookStatus.DOWNLOAD, isFavorite = false),
-            LibraryBookData("Mila and the Butterfly", R.drawable.book4, R.string.mila_and_the_butterfly, BookStatus.DOWNLOADED, isFavorite = false),
-            LibraryBookData("Ana and the Ball", R.drawable.book2, R.string.ana_and_the_ball, BookStatus.DOWNLOAD, isFavorite = true)
-        )
-        
-        populateGrid(grid, books)
-    }
-
-    private fun filterBooks(grid: GridLayout, filter: TopNav) {
-        // Clear existing views
-        grid.removeAllViews()
-        
-        val allBooks = listOf(
-            LibraryBookData("Dog and Cat", R.drawable.book1, R.string.dog_and_cat, BookStatus.DOWNLOAD, isFavorite = false),
-            LibraryBookData("Lito's Umbrella", R.drawable.book3, R.string.lito_s_umbrella, BookStatus.DOWNLOAD, isFavorite = false),
-            LibraryBookData("Mila and the Butterfly", R.drawable.book4, R.string.mila_and_the_butterfly, BookStatus.DOWNLOADED, isFavorite = false),
-            LibraryBookData("Ana and the Ball", R.drawable.book2, R.string.ana_and_the_ball, BookStatus.DOWNLOAD, isFavorite = true)
-        )
-        
-        val filteredBooks = when (filter) {
-            TopNav.BOOKS -> allBooks
-            TopNav.FAVORITES -> allBooks.filter { it.isFavorite }
-            TopNav.DOWNLOADS -> allBooks.filter { it.status == BookStatus.DOWNLOADED }
-        }
-        
-        populateGrid(grid, filteredBooks)
-    }
 
     private fun populateGrid(grid: GridLayout, books: List<LibraryBookData>) {
         books.forEachIndexed { index, book ->
@@ -250,24 +421,94 @@ class Library : Fragment() {
             .setView(dialogView)
             .create()
         
-        downloadButton.setOnClickListener {
-            if (book.status == BookStatus.DOWNLOAD) {
-                // TODO: Implement actual download functionality
-            } else {
-                // Book already downloaded
+        // Initialize Library Service
+        val libraryService = LibraryService.getInstance()
+        val authService = FirebaseAuthService.getInstance()
+        
+        if (!authService.isUserAuthenticated()) {
+            downloadButton.setOnClickListener {
+                android.widget.Toast.makeText(requireContext(), "Please sign in to download books", android.widget.Toast.LENGTH_SHORT).show()
+            }
+            favoriteButton.setOnClickListener {
+                android.widget.Toast.makeText(requireContext(), "Please sign in to manage favorites", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            // Update button states
+            downloadButton.text = if (book.status == BookStatus.DOWNLOADED) "Downloaded" else "Download"
+            favoriteButton.text = if (book.isFavorite) "Remove from Favorites" else "Add to Favorites"
+            
+            val bookId = "book_${book.titleRes}"
+            
+            downloadButton.setOnClickListener {
+                if (book.status == BookStatus.DOWNLOAD) {
+                    libraryService.downloadBook(
+                        bookId = bookId,
+                        bookTitle = getString(book.titleRes),
+                        bookAuthor = "Unknown Author",
+                        bookImageRes = book.imageRes,
+                        bookTitleRes = book.titleRes,
+                        object : LibraryService.LibraryCallback {
+                            override fun onSuccess() {
+                                android.widget.Toast.makeText(requireContext(), "Book downloaded successfully!", android.widget.Toast.LENGTH_SHORT).show()
+                                downloadButton.text = "Downloaded"
+                                downloadButton.isEnabled = false
+                                dialog.dismiss()
+                                // Refresh library
+                                loadBooksFromFirestore(currentFilter)
+                            }
+                            override fun onError(error: String) {
+                                android.widget.Toast.makeText(requireContext(), "Download failed: $error", android.widget.Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    )
+                } else {
+                    android.widget.Toast.makeText(requireContext(), "Book already downloaded", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            }
+            
+            favoriteButton.setOnClickListener {
+                if (book.isFavorite) {
+                    // Remove from favorites
+                    libraryService.removeFromFavorites(bookId, object : LibraryService.LibraryCallback {
+                        override fun onSuccess() {
+                            android.widget.Toast.makeText(requireContext(), "Removed from favorites", android.widget.Toast.LENGTH_SHORT).show()
+                            favoriteButton.text = "Add to Favorites"
+                            dialog.dismiss()
+                            // Refresh library
+                            loadBooksFromFirestore(currentFilter)
+                        }
+                        override fun onError(error: String) {
+                            android.widget.Toast.makeText(requireContext(), "Failed to remove: $error", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    })
+                } else {
+                    // Add to favorites
+                    libraryService.addToFavorites(
+                        bookId = bookId,
+                        bookTitle = getString(book.titleRes),
+                        bookAuthor = "Unknown Author",
+                        bookImageRes = book.imageRes,
+                        bookTitleRes = book.titleRes,
+                        object : LibraryService.LibraryCallback {
+                            override fun onSuccess() {
+                                android.widget.Toast.makeText(requireContext(), "Added to favorites!", android.widget.Toast.LENGTH_SHORT).show()
+                                favoriteButton.text = "Remove from Favorites"
+                            }
+                            override fun onError(error: String) {
+                                android.widget.Toast.makeText(requireContext(), "Failed to add: $error", android.widget.Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    )
+                }
             }
         }
         
-        favoriteButton.setOnClickListener {
-            // TODO: Implement actual favorite toggle functionality
-        }
-        
         readButton.setOnClickListener {
-            // Intent to open BookReaderActivity
-            val intent = Intent(requireContext(), BookReaderActivity::class.java).apply {
-                putExtra("book_title", getString(book.titleRes))
-                putExtra("book_author", "Unknown Author")
-                putExtra("book_status", book.status.name)
+            // Open StoryReaderActivity for page-by-page reading
+            val intent = Intent(requireContext(), StoryReaderActivity::class.java).apply {
+                putExtra("story_title", getString(book.titleRes))
+                putExtra("story_id", "book_${book.titleRes}")
+                putExtra("story_content", "") // Empty will trigger sample story
             }
             startActivity(intent)
             dialog.dismiss()

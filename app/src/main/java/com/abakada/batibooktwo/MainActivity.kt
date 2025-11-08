@@ -63,19 +63,25 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.library -> {
                     replaceFragment(Library())
+                    updateBottomNavigationVisibility()
                     true
                 }
                 R.id.profile -> {
                     replaceFragment(Profile())
+                    updateBottomNavigationVisibility()
                     true
                 }
                 R.id.home -> {
                     showHome()
+                    updateBottomNavigationVisibility()
                     true
                 }
                 else -> false
             }
         }
+        
+        // Check initial visibility
+        updateBottomNavigationVisibility()
 
         // Hamburger button click → show bottom sheet
         binding.menuIcon.setOnClickListener {
@@ -133,6 +139,27 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.frame_layout, fragment)
             .commit()
+        
+        // Update navigation visibility after fragment transaction
+        binding.root.post {
+            updateBottomNavigationVisibility()
+        }
+    }
+    
+    fun updateBottomNavigationVisibility() {
+        // Check if Profile fragment is showing login layout
+        val fragmentManager = supportFragmentManager
+        val profileFragment = fragmentManager.findFragmentById(R.id.frame_layout)
+        
+        if (profileFragment is Profile) {
+            val authService = FirebaseAuthService.getInstance()
+            // Hide navigation bar if user is not authenticated (showing login)
+            binding.bottomNavigationView.visibility = 
+                if (authService.isUserAuthenticated()) View.VISIBLE else View.GONE
+        } else {
+            // Show navigation bar for other fragments
+            binding.bottomNavigationView.visibility = View.VISIBLE
+        }
     }
 
     private fun showHome() {
@@ -717,24 +744,91 @@ class MainActivity : AppCompatActivity() {
             .setView(dialogView)
             .create()
         
-        downloadButton.setOnClickListener {
-            val context = applicationContext
-            val txt = "Downloading ${getString(book.titleRes)}..."
-            val time = Toast.LENGTH_SHORT
-            val toast = Toast.makeText(context, txt, time)
-            toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 0)
-            toast.show()
-            // TODO: Implement actual download functionality
-        }
+        // Initialize Library Service
+        val libraryService = LibraryService.getInstance()
+        val authService = FirebaseAuthService.getInstance()
         
-        favoriteButton.setOnClickListener {
-            val context = applicationContext
-            val txt = "Added ${getString(book.titleRes)} to favorites"
-            val time = Toast.LENGTH_SHORT
-            val toast = Toast.makeText(context, txt, time)
-            toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 0)
-            toast.show()
-            // TODO: Implement actual favorite functionality
+        // Check if user is authenticated
+        if (!authService.isUserAuthenticated()) {
+            downloadButton.setOnClickListener {
+                Toast.makeText(this, "Please sign in to download books", Toast.LENGTH_SHORT).show()
+            }
+            favoriteButton.setOnClickListener {
+                Toast.makeText(this, "Please sign in to add favorites", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            // Check book status
+            val bookId = "book_${book.titleRes}"
+            libraryService.checkBookStatus(bookId, object : LibraryService.BookStatusCallback {
+                override fun onSuccess(isFavorite: Boolean, isDownloaded: Boolean) {
+                    // Update button states based on current status
+                    favoriteButton.text = if (isFavorite) "Remove from Favorites" else "Add to Favorites"
+                    downloadButton.text = if (isDownloaded) "Downloaded" else "Download"
+                }
+            })
+            
+            downloadButton.setOnClickListener {
+                val bookId = "book_${book.titleRes}"
+                val bookTitle = getString(book.titleRes)
+                
+                libraryService.downloadBook(
+                    bookId = bookId,
+                    bookTitle = bookTitle,
+                    bookAuthor = "Unknown Author",
+                    bookImageRes = book.imageRes,
+                    bookTitleRes = book.titleRes,
+                    object : LibraryService.LibraryCallback {
+                        override fun onSuccess() {
+                            Toast.makeText(this@MainActivity, "Book downloaded successfully!", Toast.LENGTH_SHORT).show()
+                            downloadButton.text = "Downloaded"
+                            downloadButton.isEnabled = false
+                            dialog.dismiss()
+                            // Note: Library fragment will refresh automatically when user navigates to it
+                        }
+                        override fun onError(error: String) {
+                            Toast.makeText(this@MainActivity, "Download failed: $error", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                )
+            }
+            
+            favoriteButton.setOnClickListener {
+                val bookId = "book_${book.titleRes}"
+                val bookTitle = getString(book.titleRes)
+                val isCurrentlyFavorite = favoriteButton.text.toString().contains("Remove")
+                
+                if (isCurrentlyFavorite) {
+                    // Remove from favorites
+                    libraryService.removeFromFavorites(bookId, object : LibraryService.LibraryCallback {
+                        override fun onSuccess() {
+                            Toast.makeText(this@MainActivity, "Removed from favorites", Toast.LENGTH_SHORT).show()
+                            favoriteButton.text = "Add to Favorites"
+                        }
+                        override fun onError(error: String) {
+                            Toast.makeText(this@MainActivity, "Failed to remove: $error", Toast.LENGTH_SHORT).show()
+                        }
+                    })
+                } else {
+                    // Add to favorites
+                    libraryService.addToFavorites(
+                        bookId = bookId,
+                        bookTitle = bookTitle,
+                        bookAuthor = "Unknown Author",
+                        bookImageRes = book.imageRes,
+                        bookTitleRes = book.titleRes,
+                        object : LibraryService.LibraryCallback {
+                            override fun onSuccess() {
+                                Toast.makeText(this@MainActivity, "Added to favorites!", Toast.LENGTH_SHORT).show()
+                                favoriteButton.text = "Remove from Favorites"
+                                // Note: Library fragment will refresh automatically when user navigates to it
+                            }
+                            override fun onError(error: String) {
+                                Toast.makeText(this@MainActivity, "Failed to add: $error", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    )
+                }
+            }
         }
         
         readButton.setOnClickListener {

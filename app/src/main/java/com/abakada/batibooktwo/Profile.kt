@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.RadioButton
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
@@ -55,7 +54,6 @@ class Profile : Fragment() {
         val etEmail = view.findViewById<EditText>(R.id.et_email)
         val etPassword = view.findViewById<EditText>(R.id.et_password)
         val etName = view.findViewById<EditText>(R.id.et_name)
-        val layoutUserType = view.findViewById<View>(R.id.layout_user_type)
         val tvForgotPassword = view.findViewById<TextView>(R.id.tv_forgot_password)
         val tvError = view.findViewById<TextView>(R.id.tv_error)
 
@@ -68,7 +66,6 @@ class Profile : Fragment() {
             btnSignUp.background = null
             btnSubmit.text = "Sign In"
             etName.visibility = View.GONE
-            layoutUserType.visibility = View.GONE
             tvForgotPassword.visibility = View.VISIBLE
         }
 
@@ -80,7 +77,6 @@ class Profile : Fragment() {
             btnSignIn.background = null
             btnSubmit.text = "Sign Up"
             etName.visibility = View.VISIBLE
-            layoutUserType.visibility = View.VISIBLE
             tvForgotPassword.visibility = View.GONE
         }
 
@@ -107,6 +103,12 @@ class Profile : Fragment() {
                 // Sign In
                 authService.signInUser(email, password, object : FirebaseAuthService.AuthCallback {
                     override fun onSuccess(user: com.google.firebase.auth.FirebaseUser?) {
+                        // Update last login in Firestore
+                        user?.let {
+                            val userService = UserService.getInstance()
+                            userService.updateLastLogin(it.uid)
+                        }
+                        
                         Toast.makeText(requireContext(), "Signed in successfully!", Toast.LENGTH_SHORT).show()
                         // Update display name if available
                         user?.displayName?.let { name ->
@@ -114,6 +116,8 @@ class Profile : Fragment() {
                         }
                         // Refresh fragment to show profile
                         parentFragmentManager.beginTransaction().detach(this@Profile).attach(this@Profile).commit()
+                        // Update navigation visibility
+                        (activity as? MainActivity)?.updateBottomNavigationVisibility()
                     }
                     override fun onError(error: String) {
                         tvError.text = error
@@ -129,27 +133,39 @@ class Profile : Fragment() {
                     return@setOnClickListener
                 }
 
-                val rbUser = view.findViewById<RadioButton>(R.id.rb_user)
-                val userType = if (rbUser.isChecked) "user" else "admin"
-
                 authService.registerUser(email, password, object : FirebaseAuthService.AuthCallback {
                     override fun onSuccess(user: com.google.firebase.auth.FirebaseUser?) {
-                        // Update display name
+                        // Update display name and save to Firestore
                         user?.let {
-                            authService.updateDisplayName(name, object : FirebaseAuthService.AuthCallback {
-                                override fun onSuccess(user: com.google.firebase.auth.FirebaseUser?) {
-                                    Toast.makeText(requireContext(), "Account created successfully!", Toast.LENGTH_SHORT).show()
-                                    // Save user type to shared preferences
-                                    requireContext().getSharedPreferences("AppSettings", android.content.Context.MODE_PRIVATE)
-                                        .edit { putString("user_type", userType) }
-                                    // Refresh fragment to show profile
-                                    parentFragmentManager.beginTransaction().detach(this@Profile).attach(this@Profile).commit()
+                            val userService = UserService.getInstance()
+                            
+                            // Save user profile to Firestore (default userType is "user")
+                            userService.createUserProfile(
+                                userId = it.uid,
+                                email = email,
+                                displayName = name,
+                                userType = "user", // Default to "user"
+                                object : UserService.UserCallback {
+                                    override fun onSuccess() {
+                                        // Update display name in Firebase Auth
+                                        authService.updateDisplayName(name, object : FirebaseAuthService.AuthCallback {
+                                            override fun onSuccess(user: com.google.firebase.auth.FirebaseUser?) {
+                                                Toast.makeText(requireContext(), "Account created successfully!", Toast.LENGTH_SHORT).show()
+                                                // Refresh fragment to show profile
+                                                parentFragmentManager.beginTransaction().detach(this@Profile).attach(this@Profile).commit()
+                                            }
+                                            override fun onError(error: String) {
+                                                Toast.makeText(requireContext(), "Account created but failed to update name: $error", Toast.LENGTH_SHORT).show()
+                                                parentFragmentManager.beginTransaction().detach(this@Profile).attach(this@Profile).commit()
+                                            }
+                                        })
+                                    }
+                                    override fun onError(error: String) {
+                                        Toast.makeText(requireContext(), "Account created but failed to save profile: $error", Toast.LENGTH_SHORT).show()
+                                        parentFragmentManager.beginTransaction().detach(this@Profile).attach(this@Profile).commit()
+                                    }
                                 }
-                                override fun onError(error: String) {
-                                    Toast.makeText(requireContext(), "Account created but failed to update name: $error", Toast.LENGTH_SHORT).show()
-                                    parentFragmentManager.beginTransaction().detach(this@Profile).attach(this@Profile).commit()
-                                }
-                            })
+                            )
                         }
                     }
                     override fun onError(error: String) {
@@ -279,6 +295,8 @@ class Profile : Fragment() {
                 Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show()
                 // Refresh fragment to show login
                 parentFragmentManager.beginTransaction().detach(this).attach(this).commit()
+                // Update navigation visibility
+                (activity as? MainActivity)?.updateBottomNavigationVisibility()
             }
             .setNegativeButton("Cancel", null)
             .show()

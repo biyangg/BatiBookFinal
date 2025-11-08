@@ -73,15 +73,11 @@ class StoryReaderActivity : AppCompatActivity() {
             loadSampleStory()
         }
 
-        // Initialize TTS
-        ttsService.initialize { success ->
-            if (success) {
-                // TTS ready
-            }
-        }
-
         // Setup click listeners
         setupListeners()
+
+        // Initialize TTS
+        initializeTTS()
 
         // Display first page
         showPage(0)
@@ -99,28 +95,55 @@ class StoryReaderActivity : AppCompatActivity() {
         quizQuestionsContainer = findViewById(R.id.quiz_questions_container)
         btnSubmitQuiz = findViewById(R.id.btn_submit_quiz)
         quizInstruction = findViewById(R.id.quiz_instruction)
-
-        // Audio controls
-        val btnRewind = findViewById<ImageButton>(R.id.btn_rewind)
+        
+        // Make audio controls visible
+        val audioControls = findViewById<LinearLayout>(R.id.audio_controls)
+        audioControls?.visibility = View.VISIBLE
+    }
+    
+    private fun initializeTTS() {
         val btnPlayPause = findViewById<ImageButton>(R.id.btn_play_pause)
-        val btnForward = findViewById<ImageButton>(R.id.btn_forward)
-
-        btnPlayPause.setOnClickListener {
-            if (isTtsPlaying) {
-                ttsService.stop()
-                btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
-                isTtsPlaying = false
+        
+        // Initialize TTS engine
+        ttsService.initialize { success ->
+            if (success) {
+                // Set up TTS callbacks
+                ttsService.onSpeechDone = {
+                    runOnUiThread {
+                        btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
+                        isTtsPlaying = false
+                    }
+                }
+                
+                ttsService.onSpeechError = {
+                    runOnUiThread {
+                        btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
+                        isTtsPlaying = false
+                        Toast.makeText(this, "Text-to-speech error", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                
+                // Setup play/pause button
+                btnPlayPause.setOnClickListener {
+                    if (isTtsPlaying || ttsService.isSpeaking()) {
+                        ttsService.stop()
+                        btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
+                        isTtsPlaying = false
+                    } else {
+                        if (storyPages.isNotEmpty() && currentPageIndex < storyPages.size) {
+                            val currentText = storyPages[currentPageIndex].text
+                            if (currentText.isNotEmpty()) {
+                                ttsService.speak(currentText)
+                                btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
+                                isTtsPlaying = true
+                            }
+                        }
+                    }
+                }
             } else {
-                val currentText = storyPages[currentPageIndex].text
-                ttsService.speak(currentText)
-                btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
-                isTtsPlaying = true
+                btnPlayPause.isEnabled = false
+                Toast.makeText(this, "Text-to-speech not available", Toast.LENGTH_SHORT).show()
             }
-        }
-
-        ttsService.onSpeechDone = {
-            btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
-            isTtsPlaying = false
         }
     }
 
@@ -169,13 +192,13 @@ class StoryReaderActivity : AppCompatActivity() {
     private fun loadSampleStory() {
         // Sample "Dog and Cat" story
         storyPages = listOf(
-            StoryPage(R.drawable.book1, "Dog."),
-            StoryPage(R.drawable.book2, "Cat."),
-            StoryPage(R.drawable.book3, "Dog and cat."),
-            StoryPage(R.drawable.book1, "The dog runs."),
-            StoryPage(R.drawable.book2, "The cat jumps."),
-            StoryPage(R.drawable.book3, "Dog! Cat!"),
-            StoryPage(R.drawable.book1, "Together.")
+            StoryPage(R.drawable.dc_content_1, "Dog."),
+            StoryPage(R.drawable.dc_content_2, "Cat."),
+            StoryPage(R.drawable.dc_content_3, "Dog and cat."),
+            StoryPage(R.drawable.dc_content_1, "The dog runs."),
+            StoryPage(R.drawable.dc_content_2, "The cat jumps."),
+            StoryPage(R.drawable.dc_content_3, "Dog! Cat!"),
+            StoryPage(R.drawable.dc_content_3, "Together.")
         )
     }
 
@@ -196,16 +219,30 @@ class StoryReaderActivity : AppCompatActivity() {
 
         // Update navigation buttons
         btnPrev.isEnabled = index > 0
-        btnNext.text = if (index == storyPages.size - 1) "Quiz" else "→"
+        btnPrev.alpha = if (index > 0) 1.0f else 0.5f
+        btnNext.isEnabled = true
+        btnNext.text = if (index == storyPages.size - 1) "Quiz" else "Next"
+        btnNext.alpha = 1.0f
+        
+        // Stop TTS when changing pages
+        if (::ttsService.isInitialized) {
+            ttsService.stop()
+            isTtsPlaying = false
+            val btnPlayPause = findViewById<ImageButton>(R.id.btn_play_pause)
+            btnPlayPause?.setImageResource(android.R.drawable.ic_media_play)
+        }
 
-        // Save progress
-        progressService.saveProgress(
-            storyId = storyId,
-            storyTitle = storyTitle,
-            currentPage = index,
-            totalPages = storyPages.size,
-            timeSpent = 0
-        )
+        // Save progress (only if user is authenticated)
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().currentUser != null) {
+            progressService.saveProgress(
+                storyId = storyId,
+                storyTitle = storyTitle,
+                currentPage = index,
+                totalPages = storyPages.size,
+                timeSpent = 0,
+                callback = null
+            )
+        }
     }
 
     private fun showQuiz() {
@@ -213,14 +250,14 @@ class StoryReaderActivity : AppCompatActivity() {
         storyPageContainer.visibility = View.GONE
         quizContainer.visibility = View.VISIBLE
 
-        // Generate quiz from story content
+        // Generate quiz from story content - use simple quiz for kids
         val fullStoryText = storyPages.joinToString(" ") { it.text }
-        quizInstruction.text = "Answer the questions based on \"$storyTitle\""
+        quizInstruction.text = "Answer the questions about \"$storyTitle\""
 
-        quizService.generateQuizWithOpenAI(
+        // Use simple quiz generation (kid-friendly, story-aligned)
+        quizService.generateSimpleQuiz(
             storyText = fullStoryText,
-            questionCount = 5,
-            difficulty = "easy",
+            questionCount = Math.min(5, storyPages.size), // Match number of questions to story length
             object : QuizGenerationService.QuizCallback {
                 override fun onSuccess(questions: List<QuizGenerationService.QuizQuestion>) {
                     quizQuestions = questions
@@ -228,21 +265,9 @@ class StoryReaderActivity : AppCompatActivity() {
                 }
 
                 override fun onError(error: String) {
-                    // Fallback to simple quiz
-                    quizService.generateSimpleQuiz(
-                        storyText = fullStoryText,
-                        questionCount = 5,
-                        object : QuizGenerationService.QuizCallback {
-                            override fun onSuccess(questions: List<QuizGenerationService.QuizQuestion>) {
-                                quizQuestions = questions
-                                displayQuizQuestions(questions)
-                            }
-
-                            override fun onError(error: String) {
-                                Toast.makeText(this@StoryReaderActivity, "Failed to generate quiz: $error", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    )
+                    Toast.makeText(this@StoryReaderActivity, "Failed to generate quiz: $error", Toast.LENGTH_SHORT).show()
+                    // Still show quiz container with message
+                    quizInstruction.text = "Quiz generation failed. Please try again."
                 }
             }
         )
@@ -343,14 +368,17 @@ class StoryReaderActivity : AppCompatActivity() {
             .setTitle("Quiz Results")
             .setMessage(message)
             .setPositiveButton("Great Job!") { _, _ ->
-                // Mark story as completed
-                progressService.saveProgress(
-                    storyId = storyId,
-                    storyTitle = storyTitle,
-                    currentPage = storyPages.size,
-                    totalPages = storyPages.size,
-                    timeSpent = 0
-                )
+                // Mark story as completed (only if user is authenticated)
+                if (com.google.firebase.auth.FirebaseAuth.getInstance().currentUser != null) {
+                    progressService.saveProgress(
+                        storyId = storyId,
+                        storyTitle = storyTitle,
+                        currentPage = storyPages.size,
+                        totalPages = storyPages.size,
+                        timeSpent = 0,
+                        callback = null
+                    )
+                }
                 finish()
             }
             .setCancelable(false)

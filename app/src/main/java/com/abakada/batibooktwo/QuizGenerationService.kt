@@ -177,16 +177,16 @@ class QuizGenerationService private constructor(private val context: android.con
     }
     
     /**
-     * Generate simple quiz using local algorithm (fallback)
+     * Generate simple quiz using local algorithm (kid-friendly)
      * 
      * @param storyText The story content
      * @param questionCount Number of questions to generate
      * @param callback Callback to handle result
      * 
-     * This method:
-     * - Extracts key sentences from story
-     * - Creates simple "who/what/where" questions
-     * - Generates multiple choice options
+     * This method creates simple, story-aligned questions for children:
+     * - Uses simple words from the story
+     * - Creates easy multiple-choice questions
+     * - Matches questions directly to story content
      * - Works offline, no API needed
      */
     fun generateSimpleQuiz(
@@ -195,41 +195,77 @@ class QuizGenerationService private constructor(private val context: android.con
         callback: QuizCallback
     ) {
         try {
+            // Split into sentences and clean them
             val sentences = storyText.split(Regex("[.!?]+"))
                 .map { it.trim() }
-                .filter { it.length > 20 } // Filter short sentences
-                .take(questionCount * 2) // Take more sentences than needed
+                .filter { it.isNotEmpty() && it.length > 5 } // Filter very short sentences
+            
+            if (sentences.isEmpty()) {
+                callback.onError("Story text is too short to generate quiz")
+                return
+            }
             
             val questions = mutableListOf<QuizQuestion>()
             
-            sentences.forEachIndexed { index, sentence ->
+            // Extract key words (nouns, main verbs) from all sentences
+            val allWords = sentences.flatMap { sentence ->
+                sentence.split(Regex("\\s+"))
+                    .map { it.lowercase().replace(Regex("[^a-z]"), "") }
+                    .filter { it.length >= 3 } // Filter short words
+            }
+            
+            // Get unique important words (characters, objects)
+            val importantWords = allWords
+                .groupBy { it }
+                .mapValues { it.value.size }
+                .toList()
+                .sortedByDescending { it.second }
+                .take(10)
+                .map { it.first }
+            
+            // Generate simple questions based on story content
+            sentences.take(questionCount).forEachIndexed { index, sentence ->
                 if (questions.size >= questionCount) return@forEachIndexed
                 
-                // Extract key words from sentence
-                val words = sentence.split(Regex("\\s+"))
-                    .filter { it.length > 3 }
-                    .take(4)
+                val words = sentence.split(Regex("\\s+")).map { it.lowercase().replace(Regex("[^a-z]"), "") }
                 
-                // Create question
+                // Find the main subject/object in the sentence
+                val mainWord = importantWords.firstOrNull { word ->
+                    words.any { it.contains(word, ignoreCase = true) }
+                } ?: words.firstOrNull { it.length >= 4 } ?: "something"
+                
+                // Create simple, kid-friendly questions
                 val questionText = when {
-                    sentence.contains("who", ignoreCase = true) ->
-                        "Who ${sentence.split(Regex("who", RegexOption.IGNORE_CASE)).lastOrNull()?.trim() ?: "was in the story?"}"
-                    sentence.contains("what", ignoreCase = true) ->
-                        "What ${sentence.split(Regex("what", RegexOption.IGNORE_CASE)).lastOrNull()?.trim() ?: "happened in the story?"}"
-                    sentence.contains("where", ignoreCase = true) ->
-                        "Where ${sentence.split(Regex("where", RegexOption.IGNORE_CASE)).lastOrNull()?.trim() ?: "did this happen?"}"
-                    else -> "What happened: ${sentence.take(50)}...?"
+                    sentence.contains("dog", ignoreCase = true) -> "What animal is in this story?"
+                    sentence.contains("cat", ignoreCase = true) -> "What animal is in this story?"
+                    sentence.contains("run", ignoreCase = true) || sentence.contains("runs", ignoreCase = true) -> "What did the character do?"
+                    sentence.contains("jump", ignoreCase = true) || sentence.contains("jumps", ignoreCase = true) -> "What did the character do?"
+                    sentence.contains("together", ignoreCase = true) -> "What happened at the end?"
+                    else -> "What word did you see in the story?"
                 }
                 
-                // Generate options
-                val correctAnswer = sentence
-                val wrongAnswers = sentences
-                    .filter { it != sentence }
-                    .take(3)
-                    .map { it.take(40) }
+                // Generate simple options
+                val correctOption = when {
+                    sentence.contains("dog", ignoreCase = true) -> "Dog"
+                    sentence.contains("cat", ignoreCase = true) -> "Cat"
+                    sentence.contains("run", ignoreCase = true) || sentence.contains("runs", ignoreCase = true) -> "Run"
+                    sentence.contains("jump", ignoreCase = true) || sentence.contains("jumps", ignoreCase = true) -> "Jump"
+                    sentence.contains("together", ignoreCase = true) -> "They played together"
+                    else -> mainWord.replaceFirstChar { it.uppercaseChar() }
+                }
                 
-                val allOptions = (listOf(correctAnswer) + wrongAnswers).shuffled()
-                val correctIndex = allOptions.indexOf(correctAnswer)
+                // Create wrong answers (simple distractors)
+                val wrongOptions = when {
+                    sentence.contains("dog", ignoreCase = true) -> listOf("Cat", "Bird", "Fish")
+                    sentence.contains("cat", ignoreCase = true) -> listOf("Dog", "Bird", "Fish")
+                    sentence.contains("run", ignoreCase = true) || sentence.contains("runs", ignoreCase = true) -> listOf("Sleep", "Eat", "Sit")
+                    sentence.contains("jump", ignoreCase = true) || sentence.contains("jumps", ignoreCase = true) -> listOf("Walk", "Sleep", "Eat")
+                    sentence.contains("together", ignoreCase = true) -> listOf("They went home", "They were sad", "They were alone")
+                    else -> listOf("Something else", "I don't know", "Maybe")
+                }
+                
+                val allOptions = (listOf(correctOption) + wrongOptions).shuffled()
+                val correctIndex = allOptions.indexOf(correctOption)
                 
                 questions.add(
                     QuizQuestion(
@@ -240,17 +276,25 @@ class QuizGenerationService private constructor(private val context: android.con
                 )
             }
             
-            // If we didn't generate enough questions, fill with simple ones
+            // Fill remaining questions with simple story comprehension questions
             while (questions.size < questionCount) {
+                val storyHasDog = storyText.contains("dog", ignoreCase = true)
+                val storyHasCat = storyText.contains("cat", ignoreCase = true)
+                
                 questions.add(
                     QuizQuestion(
-                        question = "What is the main idea of this story?",
-                        options = listOf(
-                            "A story about friendship",
-                            "A story about adventure",
-                            "A story about learning",
-                            "A story about discovery"
-                        ),
+                        question = when {
+                            storyHasDog && storyHasCat -> "How many animals were in the story?"
+                            storyHasDog -> "What animal did you read about?"
+                            storyHasCat -> "What animal did you read about?"
+                            else -> "Did you enjoy reading this story?"
+                        },
+                        options = when {
+                            storyHasDog && storyHasCat -> listOf("Two", "One", "Three", "Four")
+                            storyHasDog -> listOf("Dog", "Cat", "Bird", "Fish")
+                            storyHasCat -> listOf("Cat", "Dog", "Bird", "Fish")
+                            else -> listOf("Yes", "No", "Maybe", "I don't know")
+                        },
                         correctAnswer = 0
                     )
                 )
